@@ -7,7 +7,7 @@
 boxplot2_original(x, format = "plot")
 }
 \arguments{
-\item{x}{data in the form of a dbl vecotor for which you would like the make a boxplot}
+\item{x}{data in the form of a dbl vector for which you would like the make a boxplot}
 
 \item{format}{Whether the function should plot, or return an object for editing.}
 }
@@ -20,7 +20,7 @@ Basic boxplot plotter.  code can be edited before plotting with format edit. box
 \examples{
 a <- rbeta(1e2,1,3)
 boxplot2_original(x = a) # just makes a boxplot
-boxplot2_original(x = a, formate = "edit") # opens a doc for editing
+boxplot2_original(x = a, format = "edit") # opens a doc for editing
 boxplot2_adjust() #runs the edited code
 
 }
