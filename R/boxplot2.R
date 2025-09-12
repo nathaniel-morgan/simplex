@@ -1,15 +1,18 @@
-#' Standard defocus curves
+#' Basic boxplot plotter.  Templates can be made to adjust it with make_template.
 #'
-#' @param df_addefo Analysis data set, read in via `haven::read_sas()`.
+#' @param x data in the form of a dbl vecotor for which you would like the make a boxplot
+#' @param template if you have made a template with make_template, placing its name as a string here will run the template code instead.
 #'
 #' @return a ggplot object
 #'
 #' @examples
-#' 1
+#' make_template("boxplot2", "triangle") # make any desired changes to the boxplot
+#' a <- rbeta(1e2,1,3)
+#' boxplot2(x = a, template = "triangle.R")
 #'
 #' @export
 #'
-boxplot2 <- function(
+boxplot2_template <- function(
     x,
     template = NULL
 ) {
