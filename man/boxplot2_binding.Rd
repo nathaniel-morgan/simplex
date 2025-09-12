@@ -10,11 +10,9 @@ boxplot2_binding(x, format = "plot")
 \item{x}{data in the form of a dbl vector for which you would like the make a boxplot}
 
 \item{format}{Whether the function should plot, or return an object for editing.}
-
-\item{name}{what name will the list object containing your plot code and environment contain}
 }
 \value{
-a ggplot object or a named list containing ggplot code along with a function environment.
+a ggplot object or a bnd class list containing ggplot code along with a function environment.
 }
 \description{
 Basic boxplot plotter. code can be modified before plotting with format edit, and bound in the global
