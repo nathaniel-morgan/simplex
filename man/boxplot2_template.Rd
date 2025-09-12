@@ -20,6 +20,6 @@ Basic boxplot plotter.  Templates can be made to adjust it with make_template.
 \examples{
 make_template("boxplot2", "triangle") # make any desired changes to the boxplot
 a <- rbeta(1e2,1,3)
-boxplot2(x = a, template = "triangle.R")
+boxplot2_template(x = a, template = "triangle.R")
 
 }
