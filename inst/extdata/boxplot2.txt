@@ -1,8 +1,8 @@
 mean_x <- mean(x)
 sd_x <- sd(x)
 outlier_range <- sd_x*2.5
-outlier <- data.frame(x = x[x-outlier_range>0|x+outlier_range<0])
-x_trim <- x[x-outlier_range<0&x+outlier_range>0]
+outlier <- data.frame(x = x[x - outlier_range > 0 | x + outlier_range < 0])
+x_trim <- x[x - outlier_range < 0 & x + outlier_range > 0]
 qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
 x_trim <- data.frame(x = x_trim)
 

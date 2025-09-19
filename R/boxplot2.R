@@ -52,10 +52,14 @@ boxplot2_template <- function(
 #'
 make_template <- function(fun = NULL, template_name = "basic"){
   if(fun %in% c("boxplot2")){
-  output <- glue("#Could concievably put an explanation of how to edit the code here \n\n",
-         "rlang::expr({{",
-         system.file("extdata", glue(fun,".txt"), package = "simplex") |>
-           readLines() |> paste(collapse = "\n"),"}})"," |> deparse() |> writeLines(","\"",template_name,".R","\"",")")
+    output <- glue(
+      "#Could concievably put an explanation of how to edit the code here \n\n",
+      "rlang::expr({{",
+      system.file("extdata", glue(fun,".txt"), package = "simplex") |>
+      readLines() |>
+      paste(collapse = "\n"),
+      "}})", " |> deparse() |> writeLines(", "\"", template_name, ".R", "\"", ")"
+    )
     invisible(rstudioapi::documentNew(
       text = output,
       type = "r"
@@ -89,23 +93,27 @@ boxplot2_original <- function(
     mean_x <- mean(x)
     sd_x <- sd(x)
     outlier_range <- sd_x*2.5
-    outlier <- data.frame(x = x[x-outlier_range>0|x+outlier_range<0])
-    x_trim <- x[x-outlier_range<0&x+outlier_range>0]
+    outlier <- data.frame(x = x[x - outlier_range > 0 | x + outlier_range < 0])
+    x_trim <- x[x - outlier_range < 0 & x + outlier_range > 0]
     qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
     x_trim <- data.frame(x = x_trim)
 
     assign("code_output",quote(
-    ggplot(outlier, aes(x = 0))+
-      geom_point(aes(y = x), pch = 8)+
-      annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
-      annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
-      expand_limits(y = range(x))))
+      ggplot(outlier, aes(x = 0))+
+        geom_point(aes(y = x), pch = 8)+
+        annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
+        annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
+        expand_limits(y = range(x))
+    ))
     if (format == "plot") eval(code_output)
     else if (format == "edit") {
-      output <- glue("#Could concievably put an explanation of how to edit the code here \n\n",
-                     "code_output$code <- ","expr({{",
-                     system.file("extdata", "boxplot2.txt", package = "simplex") |>
-                       readLines() |> paste(collapse = "\n"),"}})")
+      output <- glue(
+        "#Could concievably put an explanation of how to edit the code here \n\n",
+        "code_output$code <- ","expr({{",
+        system.file("extdata", "boxplot2.txt", package = "simplex") |>
+        readLines() |>
+        paste(collapse = "\n"), "}})"
+      )
       rstudioapi::documentNew(
         text = output,
         type = "r"
@@ -144,8 +152,8 @@ boxplot2_name <- function(
   mean_x <- mean(x)
   sd_x <- sd(x)
   outlier_range <- sd_x*2.5
-  outlier <- data.frame(x = x[x-outlier_range>0|x+outlier_range<0])
-  x_trim <- x[x-outlier_range<0&x+outlier_range>0]
+  outlier <- data.frame(x = x[x - outlier_range > 0 | x + outlier_range < 0])
+  x_trim <- x[x - outlier_range < 0 & x + outlier_range > 0]
   qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
   x_trim <- data.frame(x = x_trim)
 
@@ -154,13 +162,17 @@ boxplot2_name <- function(
       geom_point(aes(y = x), pch = 8)+
       annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
       annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
-      expand_limits(y = range(x))))
+      expand_limits(y = range(x))
+  ))
   if (format == "plot") eval(code_output)
   else if (format == "edit") {
-    output <- glue("#Could concievably put an explanation of how to edit the code here \n\n",
-                   name,"$code <- ","expr({{",
-                   system.file("extdata", "boxplot2.txt", package = "simplex") |>
-                     readLines() |> paste(collapse = "\n"),"}})")
+    output <- glue(
+      "#Could concievably put an explanation of how to edit the code here \n\n",
+      name, "$code <- ", "expr({{",
+      system.file("extdata", "boxplot2.txt", package = "simplex") |>
+      readLines() |>
+      paste(collapse = "\n"), "}})"
+    )
     rstudioapi::documentNew(
       text = output,
       type = "r"
@@ -192,8 +204,8 @@ boxplot2_binding <- function(
   mean_x <- mean(x)
   sd_x <- sd(x)
   outlier_range <- sd_x*2.5
-  outlier <- data.frame(x = x[x-outlier_range>0|x+outlier_range<0])
-  x_trim <- x[x-outlier_range<0&x+outlier_range>0]
+  outlier <- data.frame(x = x[x - outlier_range > 0 | x + outlier_range < 0])
+  x_trim <- x[x - outlier_range < 0 & x + outlier_range > 0]
   qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
   x_trim <- data.frame(x = x_trim)
 
@@ -202,13 +214,17 @@ boxplot2_binding <- function(
       geom_point(aes(y = x), pch = 8)+
       annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
       annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
-      expand_limits(y = range(x))))
+      expand_limits(y = range(x))
+  ))
   if (format == "plot") eval(code_output)
   else if (format == "edit") {
-    output <- glue("#Be sure to fill in the space to the left of $code with the object name you are adjusting \n\n",
-                   "$code <- ","expr({{",
-                   system.file("extdata", "boxplot2.txt", package = "simplex") |>
-                     readLines() |> paste(collapse = "\n"),"}})")
+    output <- glue(
+      "#Be sure to fill in the space to the left of $code with the object name you are adjusting \n\n",
+      "$code <- ", "expr({{",
+      system.file("extdata", "boxplot2.txt", package = "simplex") |>
+      readLines() |>
+      paste(collapse = "\n"), "}})"
+    )
     rstudioapi::documentNew(
       text = output,
       type = "r"
