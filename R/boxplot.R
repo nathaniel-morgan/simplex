@@ -1,38 +1,51 @@
 #' Basic boxplot plotter.  Templates can be made to adjust it with make_template.
 #'
-#' @param x data in the form of a dbl vecotor for which you would like the make a boxplot
+#' @param x data in the form of a tibble with a column of value and column of classes
+#' @param value the name of the column of values
+#' @param class the name of the column of classes
 #' @param template if you have made a template with make_template, placing its name as a string here will run the template code instead.
 #'
 #' @return a ggplot object
 #'
 #' @examples
-#' make_template("boxplot2", "triangle") # make any desired changes to the boxplot
+#' make_template("boxplot", "triangle") # make any desired changes to the boxplot
 #' a <- rbeta(1e2,1,3)
-#' boxplot2_template(x = a, template = "triangle.R")
+#' boxplot_template(x = a, template = "triangle.R")
 #'
 #' @export
 #'
-boxplot2_template <- function(
+boxplot_template <- function(
     x,
+    value,
+    class,
     template = NULL
 ) {
   if(is.null(template)){
-    mean_x <- mean(x)
-    sd_x <- sd(x)
-    outlier_range <- sd_x*2.5
-    outlier <- data.frame(x = x[x-outlier_range>0|x+outlier_range<0])
-    x_trim <- x[x-outlier_range<0&x+outlier_range>0]
-    qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
-    x_trim <- data.frame(x = x_trim)
+    x <- x |>
+      group_by(.data[[class]]) |>
+      mutate(
+        q1 = quantile(.data[[value]], 0.25),
+        q3 = quantile(.data[[value]], 0.75),
+        median = median(.data[[value]]),
+        iqr = q3 - q1,
+        lower = q1 - 1.5 * iqr,
+        upper = q3 + 1.5 * iqr,
+        outlier = .data[[value]] < lower | .data[[value]] > upper,
+        min = min(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE),
+        max = max(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE)
+      ) |>
+      ungroup()
 
-    ggplot(outlier, aes(x = 0))+
-      geom_point(aes(y = x), pch = 8)+
-      annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
-      annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
-      expand_limits(y = range(x))
+    print(ggplot(x, aes(x = .data[[class]], y = .data[[value]]))+
+            geom_point(aes(y = .data[[value]]), pch = 8)+
+            geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
+            geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white"))
   }
   else {
-    source(template, local = TRUE)
+    code <- readLines(template)
+    code <- gsub('\\.data\\[\\["class"\\]\\]', paste0('.data[["', class, '"]]'), code)
+    code <- gsub('\\.data\\[\\["value"\\]\\]', paste0('.data[["', value, '"]]'), code)
+    eval(parse(text = code), envir = environment())
   }
 }
 
@@ -44,14 +57,14 @@ boxplot2_template <- function(
 #' @return A .r file in your working directory.
 #'
 #' @examples
-#' make_template("boxplot2", "triangle") # make any desired changes to the boxplot
+#' make_template("boxplot", "triangle") # make any desired changes to the boxplot
 #' a <- rbeta(1e2,1,3)
-#' boxplot2_template(x = a, template = "triangle.R")
+#' boxplot_template(x = a, template = "triangle.R")
 #'
 #' @export
 #'
 make_template <- function(fun = NULL, template_name = "basic"){
-  if(fun %in% c("boxplot2")){
+  if(fun %in% c("boxplot")){
     output <- glue(
       "#Could concievably put an explanation of how to edit the code here \n\n",
       "rlang::expr({{",
@@ -246,4 +259,26 @@ bnd <- function(...) {
 print.bnd <- function(x, ...) {
   eval(x$code, envir = x$env)
   invisible(x)
+}
+
+boxplot <- function(x, value, class){
+  x <- x |>
+    group_by(.data[[class]]) |>
+    mutate(
+      q1 = quantile(.data[[value]], 0.25),
+      q3 = quantile(.data[[value]], 0.75),
+      median = median(.data[[value]]),
+      iqr = q3 - q1,
+      lower = q1 - 1.5 * iqr,
+      upper = q3 + 1.5 * iqr,
+      outlier = .data[[value]] < lower | .data[[value]] > upper,
+      min = min(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE),
+      max = max(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE)
+    ) |>
+    ungroup()
+
+  print(ggplot(x, aes(x = .data[[class]], y = .data[[value]]))+
+          geom_point(apch = 8)+
+          geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
+          geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white"))
 }
