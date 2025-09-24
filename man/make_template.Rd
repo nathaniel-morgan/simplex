@@ -7,9 +7,9 @@
 make_template(fun = NULL, template_name = "basic")
 }
 \arguments{
-\item{fun}{the function for which you want to make a template}
+\item{fun}{the function for which you want to make a template as a string.}
 
-\item{template_name}{the resulting filename for your template.}
+\item{template_name}{the resulting filename for your template as a string.}
 }
 \value{
 A .r file in your working directory.
@@ -19,7 +19,7 @@ Creates templates
 }
 \examples{
 make_template("boxplot", "triangle") # make any desired changes to the boxplot
-a <- rbeta(1e2,1,3)
+a <- tibble(value = c(rnorm(2e2,1), 4*rbeta(2e2,1,4)), class = c(rep("a",2e2),rep("b",2e2)))
 boxplot_template(x = a, template = "triangle.R")
 
 }

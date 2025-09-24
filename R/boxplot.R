@@ -1,64 +1,57 @@
 #' Basic boxplot plotter.  Templates can be made to adjust it with make_template.
 #'
-#' @param x data in the form of a tibble with a column of value and column of classes
-#' @param value the name of the column of values
-#' @param class the name of the column of classes
+#' @param x data in the form of a tibble with a column of values named value and column of classes name class
 #' @param template if you have made a template with make_template, placing its name as a string here will run the template code instead.
 #'
 #' @return a ggplot object
 #'
 #' @examples
 #' make_template("boxplot", "triangle") # make any desired changes to the boxplot
-#' a <- rbeta(1e2,1,3)
+#' a <- tibble(value = c(rnorm(2e2,1), 4*rbeta(2e2,1,4)), class = c(rep("a",2e2),rep("b",2e2)))
 #' boxplot_template(x = a, template = "triangle.R")
 #'
 #' @export
 #'
 boxplot_template <- function(
     x,
-    value,
-    class,
     template = NULL
 ) {
   if(is.null(template)){
     x <- x |>
-      group_by(.data[[class]]) |>
+      group_by(class) |>
       mutate(
-        q1 = quantile(.data[[value]], 0.25),
-        q3 = quantile(.data[[value]], 0.75),
-        median = median(.data[[value]]),
+        q1 = quantile(value, 0.25),
+        q3 = quantile(value, 0.75),
+        median = median(value),
         iqr = q3 - q1,
         lower = q1 - 1.5 * iqr,
         upper = q3 + 1.5 * iqr,
-        outlier = .data[[value]] < lower | .data[[value]] > upper,
-        min = min(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE),
-        max = max(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE)
+        outlier = value < lower | value > upper,
+        min = min(ifelse(!outlier, value, NA), na.rm = TRUE),
+        max = max(ifelse(!outlier, value, NA), na.rm = TRUE)
       ) |>
       ungroup()
 
-    print(ggplot(x, aes(x = .data[[class]], y = .data[[value]]))+
-            geom_point(aes(y = .data[[value]]), pch = 8)+
+    print(ggplot(x, aes(x = class, y = value))+
+            geom_point(data = x |> filter(outlier == TRUE), pch = 8)+
             geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
             geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white"))
   }
   else {
-    code <- readLines(template)
-    code <- gsub('\\.data\\[\\["class"\\]\\]', paste0('.data[["', class, '"]]'), code)
-    code <- gsub('\\.data\\[\\["value"\\]\\]', paste0('.data[["', value, '"]]'), code)
-    eval(parse(text = code), envir = environment())
+    source(template, local = TRUE)
   }
 }
 
 #' Creates templates
 #'
-#' @param fun the function for which you want to make a template
-#' @param template_name the resulting filename for your template.
+#' @param fun the function for which you want to make a template as a string.
+#' @param template_name the resulting filename for your template as a string.
 #'
 #' @return A .r file in your working directory.
 #'
 #' @examples
 #' make_template("boxplot", "triangle") # make any desired changes to the boxplot
-#' a <- rbeta(1e2,1,3)
+#' a <- tibble(value = c(rnorm(2e2,1), 4*rbeta(2e2,1,4)), class = c(rep("a",2e2),rep("b",2e2)))
 #' boxplot_template(x = a, template = "triangle.R")
 #'
 #' @export
@@ -84,7 +77,7 @@ make_template <- function(fun = NULL, template_name = "basic"){
   }
 }
 
-#' Basic boxplot plotter.  code can be edited before plotting with format edit. boxplot2_adjust can run the modified code.
+#' Basic boxplot plotter.  code can be edited before plotting with format edit. boxplot_adjust can run the modified code.
 #'
 #' @param x data in the form of a dbl vector for which you would like the make a boxplot
 #' @param format Whether the function should plot, or return an object for editing.
@@ -92,38 +85,44 @@ make_template <- function(fun = NULL, template_name = "basic"){
 #' @return a ggplot object or a list containing ggplot code along with a function environment.
 #'
 #' @examples
-#' a <- rbeta(1e2,1,3)
-#' boxplot2_original(x = a) # just makes a boxplot
-#' boxplot2_original(x = a, format = "edit") # opens a doc for editing
-#' boxplot2_adjust() #runs the edited code
+#' a <- tibble(value = c(rnorm(2e2,1), 4*rbeta(2e2,1,4)), class = c(rep("a",2e2),rep("b",2e2)))
+#' boxplot_original(x = a) # just makes a boxplot
+#' boxplot_original(x = a, format = "edit") # opens a doc for editing
+#' boxplot_adjust() #runs the edited code
 #'
 #' @export
 #'
-boxplot2_original <- function(
+boxplot_original <- function(
     x,
     format = "plot"
 ) {
-    mean_x <- mean(x)
-    sd_x <- sd(x)
-    outlier_range <- sd_x*2.5
-    outlier <- data.frame(x = x[x - outlier_range > 0 | x + outlier_range < 0])
-    x_trim <- x[x - outlier_range < 0 & x + outlier_range > 0]
-    qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
-    x_trim <- data.frame(x = x_trim)
+  x <- x |>
+    group_by(class) |>
+    mutate(
+      q1 = quantile(value, 0.25),
+      q3 = quantile(value, 0.75),
+      median = median(value),
+      iqr = q3 - q1,
+      lower = q1 - 1.5 * iqr,
+      upper = q3 + 1.5 * iqr,
+      outlier = value < lower | value > upper,
+      min = min(ifelse(!outlier, value, NA), na.rm = TRUE),
+      max = max(ifelse(!outlier, value, NA), na.rm = TRUE)
+    ) |>
+    ungroup()
 
     assign("code_output",quote(
-      ggplot(outlier, aes(x = 0))+
-        geom_point(aes(y = x), pch = 8)+
-        annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
-        annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
-        expand_limits(y = range(x))
+      ggplot(x, aes(x = class, y = value))+
+        geom_point(data = x |> filter(outlier == TRUE), pch = 8)+
+        geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
+        geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white")
     ))
     if (format == "plot") eval(code_output)
     else if (format == "edit") {
       output <- glue(
         "#Could concievably put an explanation of how to edit the code here \n\n",
         "code_output$code <- ","expr({{",
-        system.file("extdata", "boxplot2.txt", package = "simplex") |>
+        system.file("extdata", "boxplot.txt", package = "simplex") |>
         readLines() |>
         paste(collapse = "\n"), "}})"
       )
@@ -137,52 +136,58 @@ boxplot2_original <- function(
 }
 
 #' @export
-boxplot2_adjust <- function(name = code_output){
+boxplot_adjust <- function(name = code_output){
   eval(name$code, envir = name$env)
 }
 
 #' Basic boxplot plotter. code can be modified before plotting with format edit
 #'
-#' @param x data in the form of a dbl vector for which you would like the make a boxplot
-#' @param format Whether the function should plot, or return an object for editing.
+#' @param x data in the form of a tibble with a column of values named value and column of classes name class
+#' @param format Whether the function should plot (plot), or return an object for editing (edit).
 #' @param name what name will the list object containing your plot code and environment contain
 #'
 #' @return a ggplot object or a named list containing ggplot code along with a function environment.
 #'
 #' @examples
-#' a <- rbeta(1e2,1,3)
-#' boxplot2_name(x = a) # just makes a boxplot
-#' boxplot2_name(x = a, format = "edit", name = "circle_points") # opens a doc for editing
-#' boxplot2_adjust(circle_points) #runs the edited code
+#' a <- tibble(value = c(rnorm(2e2,1), 4*rbeta(2e2,1,4)), class = c(rep("a",2e2),rep("b",2e2)))
+#' boxplot_name(x = a) # just makes a boxplot
+#' boxplot_name(x = a, format = "edit", name = "circle_points") # opens a doc for editing
+#' boxplot_adjust(circle_points) #runs the edited code
 #'
 #' @export
 #'
-boxplot2_name <- function(
+boxplot_name <- function(
     x,
     format = "plot",
     name = "code_output"
 ) {
-  mean_x <- mean(x)
-  sd_x <- sd(x)
-  outlier_range <- sd_x*2.5
-  outlier <- data.frame(x = x[x - outlier_range > 0 | x + outlier_range < 0])
-  x_trim <- x[x - outlier_range < 0 & x + outlier_range > 0]
-  qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
-  x_trim <- data.frame(x = x_trim)
+  x <- x |>
+    group_by(class) |>
+    mutate(
+      q1 = quantile(value, 0.25),
+      q3 = quantile(value, 0.75),
+      median = median(value),
+      iqr = q3 - q1,
+      lower = q1 - 1.5 * iqr,
+      upper = q3 + 1.5 * iqr,
+      outlier = value < lower | value > upper,
+      min = min(ifelse(!outlier, value, NA), na.rm = TRUE),
+      max = max(ifelse(!outlier, value, NA), na.rm = TRUE)
+    ) |>
+    ungroup()
 
   assign(name, quote(
-    ggplot(outlier, aes(x = 0))+
-      geom_point(aes(y = x), pch = 8)+
-      annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
-      annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
-      expand_limits(y = range(x))
+    ggplot(x, aes(x = class, y = value))+
+      geom_point(data = x |> filter(outlier == TRUE), pch = 8)+
+      geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
+      geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white")
   ))
   if (format == "plot") eval(code_output)
   else if (format == "edit") {
     output <- glue(
       "#Could concievably put an explanation of how to edit the code here \n\n",
       name, "$code <- ", "expr({{",
-      system.file("extdata", "boxplot2.txt", package = "simplex") |>
+      system.file("extdata", "boxplot.txt", package = "simplex") |>
       readLines() |>
       paste(collapse = "\n"), "}})"
     )
@@ -197,44 +202,50 @@ boxplot2_name <- function(
 
 #' Basic boxplot plotter. code can be modified before plotting with format edit, and bound in the global
 #'
-#' @param x data in the form of a dbl vector for which you would like the make a boxplot
+#' @param x data in the form of a tibble with a column of values named value and column of classes name class
 #' @param format Whether the function should plot, or return an object for editing.
 #'
 #' @return a ggplot object or a bnd class list containing ggplot code along with a function environment.
 #'
 #' @examples
-#' a <- rbeta(1e2,1,3)
-#' boxplot2_binding(x = a) # just makes a boxplot
-#' diamond_points <- boxplot2_binding(x = a, format = "edit") # opens a doc for editing
-#' diamaond_points #runs the edited code using new S3 method
+#' a <- tibble(value = c(rnorm(2e2,1), 4*rbeta(2e2,1,4)), class = c(rep("a",2e2),rep("b",2e2)))
+#' boxplot_binding(x = a) # just makes a boxplot
+#' diamond_points <- boxplot_binding(x = a, format = "edit") # opens a doc for editing
+#' diamond_points #runs the edited code using new S3 method
 #'
 #' @export
 #'
-boxplot2_binding <- function(
+boxplot_binding <- function(
     x,
     format = "plot"
 ) {
-  mean_x <- mean(x)
-  sd_x <- sd(x)
-  outlier_range <- sd_x*2.5
-  outlier <- data.frame(x = x[x - outlier_range > 0 | x + outlier_range < 0])
-  x_trim <- x[x - outlier_range < 0 & x + outlier_range > 0]
-  qx <- quantile(x_trim, probs = c(0, .25, .5, .75, 1))
-  x_trim <- data.frame(x = x_trim)
+  x <- x |>
+    group_by(class) |>
+    mutate(
+      q1 = quantile(value, 0.25),
+      q3 = quantile(value, 0.75),
+      median = median(value),
+      iqr = q3 - q1,
+      lower = q1 - 1.5 * iqr,
+      upper = q3 + 1.5 * iqr,
+      outlier = value < lower | value > upper,
+      min = min(ifelse(!outlier, value, NA), na.rm = TRUE),
+      max = max(ifelse(!outlier, value, NA), na.rm = TRUE)
+    ) |>
+    ungroup()
 
   assign("code_output", quote(
-    ggplot(outlier, aes(x = 0))+
-      geom_point(aes(y = x), pch = 8)+
-      annotate("errorbar", x=0, ymin = qx[1], ymax = qx[5], width = 0.1)+
-      annotate("crossbar", x=0, ymin = qx[2], y = qx[3], ymax = qx[4], width = 0.2, fill = "white")+
-      expand_limits(y = range(x))
+    ggplot(x, aes(x = class, y = value))+
+      geom_point(data = x |> filter(outlier == TRUE), pch = 8)+
+      geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
+      geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white")
   ))
   if (format == "plot") eval(code_output)
   else if (format == "edit") {
     output <- glue(
       "#Be sure to fill in the space to the left of $code with the object name you are adjusting \n\n",
       "$code <- ", "expr({{",
-      system.file("extdata", "boxplot2.txt", package = "simplex") |>
+      system.file("extdata", "boxplot.txt", package = "simplex") |>
       readLines() |>
       paste(collapse = "\n"), "}})"
     )
@@ -261,24 +272,24 @@ print.bnd <- function(x, ...) {
   invisible(x)
 }
 
-boxplot <- function(x, value, class){
+boxplot <- function(x){
   x <- x |>
-    group_by(.data[[class]]) |>
+    group_by(class) |>
     mutate(
-      q1 = quantile(.data[[value]], 0.25),
-      q3 = quantile(.data[[value]], 0.75),
-      median = median(.data[[value]]),
+      q1 = quantile(value, 0.25),
+      q3 = quantile(value, 0.75),
+      median = median(value),
       iqr = q3 - q1,
       lower = q1 - 1.5 * iqr,
       upper = q3 + 1.5 * iqr,
-      outlier = .data[[value]] < lower | .data[[value]] > upper,
-      min = min(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE),
-      max = max(ifelse(!outlier, .data[[value]], NA), na.rm = TRUE)
+      outlier = value < lower | value > upper,
+      min = min(ifelse(!outlier, value, NA), na.rm = TRUE),
+      max = max(ifelse(!outlier, value, NA), na.rm = TRUE)
     ) |>
     ungroup()
 
-  print(ggplot(x, aes(x = .data[[class]], y = .data[[value]]))+
-          geom_point(apch = 8)+
+  print(ggplot(x, aes(x = class, y = value))+
+          geom_point(data = x |> filter(outlier == TRUE), pch = 8)+
           geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
           geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white"))
 }

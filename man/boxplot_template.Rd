@@ -4,14 +4,10 @@
 \alias{boxplot_template}
 \title{Basic boxplot plotter.  Templates can be made to adjust it with make_template.}
 \usage{
-boxplot_template(x, value, class, template = NULL)
+boxplot_template(x, template = NULL)
 }
 \arguments{
-\item{x}{data in the form of a tibble with a column of value and column of classes}
-
-\item{value}{the name of the column of values}
-
-\item{class}{the name of the column of classes}
+\item{x}{data in the form of a tibble with a column of values named value and column of classes name class}
 
 \item{template}{if you have made a template with make_template, placing its name as a string here will run the template code instead.}
 }
@@ -23,7 +19,7 @@ Basic boxplot plotter.  Templates can be made to adjust it with make_template.
 }
 \examples{
 make_template("boxplot", "triangle") # make any desired changes to the boxplot
-a <- rbeta(1e2,1,3)
+a <- tibble(value = c(rnorm(2e2,1), 4*rbeta(2e2,1,4)), class = c(rep("a",2e2),rep("b",2e2)))
 boxplot_template(x = a, template = "triangle.R")
 
 }
