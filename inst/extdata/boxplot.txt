@@ -1,0 +1,21 @@
+x <- x |>
+  group_by(class) |>
+  mutate(
+    q1 = quantile(value, 0.25),
+    q3 = quantile(value, 0.75),
+    median = median(value),
+    iqr = q3 - q1,
+    lower = q1 - 1.5 * iqr,
+    upper = q3 + 1.5 * iqr,
+    outlier = value < lower | value > upper,
+    min = min(ifelse(!outlier, value, NA), na.rm = TRUE),
+    max = max(ifelse(!outlier, value, NA), na.rm = TRUE)
+  ) |>
+  ungroup()
+
+print(
+  ggplot(x, aes(x = class, y = value))+
+    geom_point(data = x |> filter(outlier == TRUE), pch = 8)+
+    geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
+    geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white")
+    )
