@@ -58,18 +58,12 @@ boxplot_template <- function(
 #'
 make_template <- function(fun = NULL, template_name = "basic"){
   if(fun %in% c("boxplot", "weather")){
-    output <- glue(
-      "#Could concievably put an explanation of how to edit the code here \n\n",
-      "rlang::expr({{",
+    output <- c(
+      "#Could concievably put an explanation of how to edit the code here \n",
       system.file("extdata", glue(fun,".txt"), package = "simplex") |>
-      readLines() |>
-      paste(collapse = "\n"),
-      "}})", " |> deparse() |> writeLines(", "\"", template_name, ".R", "\"", ")"
-    )
-    invisible(rstudioapi::documentNew(
-      text = output,
-      type = "r"
-    ))
+      readLines()) |>
+      writeLines(paste0(template_name,".R"))
+    invisible(rstudioapi::navigateToFile(paste0(template_name, ".R")))
   }
   else {
     glue(fun," is not an existing function of the simplex package")
