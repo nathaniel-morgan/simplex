@@ -57,7 +57,7 @@ boxplot_template <- function(
 #' @export
 #'
 make_template <- function(fun = NULL, template_name = "basic"){
-  if(fun %in% c("boxplot")){
+  if(fun %in% c("boxplot", "weather")){
     output <- glue(
       "#Could concievably put an explanation of how to edit the code here \n\n",
       "rlang::expr({{",
