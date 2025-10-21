@@ -1,0 +1,69 @@
+---
+title: "wrapper_paper"
+format:
+  pdf:
+    pdf-engine: pdflatex
+editor_options: 
+  chunk_output_type: console
+header-includes:
+  - \usepackage{xcolor}
+---
+
+# Wrapper Functions Exist
+
+## What are wrapper functions
+### Functions that try to make a complex process easy to run 
+### ggplot wrapper functions (the focus of this paper?)
+
+## Advantages to wrappers
+### Complex analysis and plots can be created in one line by new user
+### examples of popular wrappers
+
+## How they can obscure user choice
+### plot and function parameters that arn't adjustable
+### example of wrapper plots that can be difficult to edit (time series comes to mind)
+### Complex crash messages that arn't clear about their source
+
+# Issues with developing wrapper functions
+
+## The balance between simplicity for user, and ability to customize.
+### More options for input can lead to increasing code complexity when trying to account for every combination
+
+## Self contained versus non self contained wrapper functions?
+### Functions that call other functions
+#### Functions that call non-exported functions
+#### Functions that call C code. 
+### Functions that utilize S3 or other methods. 
+
+# Potential solutions to simplicity & Customization tradeoff
+
+## "original" method (Perhaps so simple that I just combine it and the name method which have very little difference)
+### The simplest default solution I originally developed
+### Runs into issues if making more than 1 or 2 custom plots
+
+## name method
+### A slight improvement on that in the form of the "name" method
+### Alows for storing multiple different customized plots since each has seperate binding name
+
+## binding method
+### Can utlize S3 print methods and is more explicit
+### Doesn't save lists into user global without their knowlege
+
+## template method
+### Uses .R files to store custom made templates for further use
+
+## Why i think the template method is the best
+### Templates can easily be shared between various users or stored between sessions
+### Easier to further edit an R file after saving as opposed to a list stored in your global
+
+# Utilizing these solutionson pre - existing wrappers
+
+## Simple method for editing other functions
+### basic function that can pull code of a function into a new window for editing and saving a new version of that wrapper function
+### Will run into issues on any non-self contained wrapper function (many of them)
+### The best implementations will involve the author including these methods of editing themselves
+
+## Not sure but If i try to make a roxygen tag it goes here
+
+## how wrapper writers could utlize these potential solutions (This might should be done in the previous section as I explain the methods)
+
