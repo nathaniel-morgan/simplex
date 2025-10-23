@@ -58,11 +58,9 @@ boxplot_template <- function(
 #'
 make_template <- function(fun = NULL, template_name = "basic"){
   if(fun %in% c("boxplot", "weather")){
-    output <- c(
-      "#Could concievably put an explanation of how to edit the code here \n",
-      system.file("extdata", glue(fun,".txt"), package = "simplex") |>
-      readLines()) |>
-      writeLines(paste0(template_name,".R"))
+    src <- system.file("extdata", paste0(fun, ".R"), package = "simplex")
+    dest <- paste0(template_name, ".R")
+    file.copy(src, dest, overwrite = FALSE)
     invisible(rstudioapi::navigateToFile(paste0(template_name, ".R")))
   }
   else {
@@ -116,7 +114,7 @@ boxplot_original <- function(
       output <- glue(
         "#Could concievably put an explanation of how to edit the code here \n\n",
         "code_output$code <- ","expr({{",
-        system.file("extdata", "boxplot.txt", package = "simplex") |>
+        system.file("extdata", "boxplot.R", package = "simplex") |>
         readLines() |>
         paste(collapse = "\n"), "}})"
       )
@@ -181,7 +179,7 @@ boxplot_name <- function(
     output <- glue(
       "#Could concievably put an explanation of how to edit the code here \n\n",
       name, "$code <- ", "expr({{",
-      system.file("extdata", "boxplot.txt", package = "simplex") |>
+      system.file("extdata", "boxplot.R", package = "simplex") |>
       readLines() |>
       paste(collapse = "\n"), "}})"
     )
@@ -239,7 +237,7 @@ boxplot_binding <- function(
     output <- glue(
       "#Be sure to fill in the space to the left of $code with the object name you are adjusting \n\n",
       "$code <- ", "expr({{",
-      system.file("extdata", "boxplot.txt", package = "simplex") |>
+      system.file("extdata", "boxplot.R", package = "simplex") |>
       readLines() |>
       paste(collapse = "\n"), "}})"
     )

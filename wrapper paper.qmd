@@ -9,7 +9,7 @@ header-includes:
   - \usepackage{xcolor}
 ---
 
-# Wrapper Functions Exist
+# Wrapper Functions Background
 
 ## What are wrapper functions
 ### Functions that try to make a complex process easy to run 

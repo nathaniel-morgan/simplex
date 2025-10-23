@@ -18,4 +18,4 @@ print(
     geom_point(data = x |> filter(outlier == TRUE), pch = 8)+
     geom_errorbar(aes(ymin = min, ymax = max), width = 0.1)+
     geom_crossbar(aes(ymin = q1, y = median, ymax = q3), width = 0.2, fill = "white")
-    )
+)
