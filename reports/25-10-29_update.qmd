@@ -1,0 +1,110 @@
+---
+title: "25-10-29_update"
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+# Update to make_template creating a file and opening into new window
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+theme_set(theme_minimal())
+theme_update(panel.grid.minor = element_blank())
+knitr::opts_chunk$set(warning = FALSE)
+library(ggclassify)
+library(simplex)
+
+set.seed(17)
+
+df <- data.frame(x = rnorm(40), y=rnorm(40) + 2, class = factor("A")) |> 
+  rbind(data.frame(x = rnorm(40, sd=2) + 2, y=rnorm(40, sd = 2) - 1, class = factor("B"))) |> 
+  rbind(data.frame(x = rnorm(40, sd=1/2) + 2, y=rnorm(40, sd = 1/2) + 1,class = factor("C")))
+```
+
+# Create a wrapper function in ggclassify for blending color
+
+## Boundary bootwrapping function
+
+uses rgb to return the proportion of each values that belongs to each class on the mesh
+
+```{r}
+simpleplot <- ggplot(df, aes(x, y, fill = class))+
+   geom_point_fill()
+
+classify_boot_blend(df, simpleplot, n = 100, res = 101, method = "lda", blend = "tricolor")
+classify_boot_blend(df, simpleplot, n = 100, res = 101, method = "qda", blend = "tricolor")
+classify_boot_blend(df, simpleplot, n = 100, res = 101, method = "knn", blend = "tricolor")
+classify_boot_blend(df, simpleplot, n = 100, res = 101, method = "randomForest", blend = "tricolor")
+
+simpleplot_2 <- ggplot(df |> filter(class %in% c("A","B")),aes(x,y,fill = class))+
+  geom_point(aes(col = class))
+
+df |> filter(class %in% c("A","B")) |> 
+  classify_boot_blend(simpleplot_2, n = 100, res = 101,
+                      method = "knn", blend = "bicolor")
+```
+
+# Clustering Geoms
+
+## Geom_Cluster
+
+```{r}
+library(tidyclust)
+
+kmeans_spec <- k_means(num_clusters = 3) |> set_engine("stats") 
+kmeans_spec_5 <- k_means(num_clusters = 5) |> set_engine("stats")
+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec) + 
+  geom_point()
+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5) + 
+  geom_point()
+
+ggplot(penguins, aes(bill_len, bill_dep)) + 
+  geom_cluster(method = kmeans_spec) + 
+  geom_point()
+
+ggplot(penguins, aes(bill_len, bill_dep)) + 
+  geom_cluster(method = kmeans_spec_5) + 
+  geom_point()
+
+hc_spec <- hier_clust(
+  num_clusters = 3,
+  linkage_method = "average"
+)
+
+ggplot(df, aes(x, y)) + 
+  geom_cluster(method = hc_spec) + 
+  geom_point()
+
+
+ggplot(penguins, aes(bill_len, bill_dep)) + 
+  geom_cluster(method = kmeans_spec) + 
+  geom_point() +
+  facet_wrap(~sex)
+```
+
+## Geom_Cluster_Boundary
+
+```{r}
+ggplot(penguins, aes(bill_len, bill_dep)) + 
+  geom_cluster_boundary(method = kmeans_spec) + 
+  geom_point()
+
+ggplot(penguins, aes(bill_len, bill_dep)) + 
+  geom_cluster_boundary(method = kmeans_spec_5) + 
+  geom_point()
+
+ggplot(penguins |> remove_missing(), aes(bill_len, bill_dep)) + 
+  geom_cluster_boundary(method = kmeans_spec) + 
+  geom_point() +
+  facet_wrap(~sex)
+
+ggplot(penguins |> remove_missing(), aes(bill_len, bill_dep)) + 
+  geom_cluster_boundary(method = kmeans_spec, aes(lty = sex)) + 
+  geom_point() 
+```
+

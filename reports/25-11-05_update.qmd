@@ -1,0 +1,110 @@
+---
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+# 25-11-05_update
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+theme_set(theme_minimal())
+theme_update(panel.grid.minor = element_blank())
+knitr::opts_chunk$set(warning = FALSE)
+library(ggclassify)
+library(simplex)
+library(patchwork)
+
+set.seed(17)
+
+df <- data.frame(x = rnorm(40), y=rnorm(40) + 2, class = factor("A")) |> 
+  rbind(data.frame(x = rnorm(40, sd=2) + 2, y=rnorm(40, sd = 2) - 1, class = factor("B"))) |> 
+  rbind(data.frame(x = rnorm(40, sd=1/2) + 2, y=rnorm(40, sd = 1/2) + 1,class = factor("C")))
+```
+
+# Modify the wrapper function in ggclassify for blending color to accept any number of classes
+
+## Blend style
+
+returns the weighted average color of each point across all bootstraps. 
+
+```{r}
+samp <- rnorm_mixture(200, mean = roots_of_unity(10), var = .2)
+bidata <- tibble(x = samp[,1], y = samp[,2], class = attr(samp, "component"))
+
+simpleplot4 <- ggplot(bidata, aes(x, y, fill = class))+
+  geom_point_fill()
+
+classify_boot_blend(bidata, simpleplot4, n = 100, res = 101, method = "lda")
+
+ggplot(bidata, aes(x = x, y = y, fill = class))+
+  geom_classify()+
+  geom_point_fill()
+```
+
+Default LDA of non-boostrapped data for comparison
+
+\newpage 
+
+The same plots are repeated but with fewer classes, lower variability, and qda.
+
+```{r}
+samp2 <- rnorm_mixture(200, mean = roots_of_unity(6), var = .1)
+bidata2 <- tibble(x = samp2[,1], y = samp2[,2], class = attr(samp2, "component"))
+
+simpleplot5 <- ggplot(bidata2, aes(x, y, fill = class))+
+  geom_point_fill()
+
+classify_boot_blend(bidata2, simpleplot5, n = 100, res = 101, method = "qda")
+
+ggplot(bidata2, aes(x = x, y = y, fill = class))+
+  geom_classify(method = "qda")+
+  geom_point_fill()
+```
+
+\newpage
+## Blend spectrum cmyk
+
+As opposed to averaging the colors in the rgb space, i've also expirimented with
+converting to cmyk, averaging there, and then converting back. This causes areas of
+uncertainty to trend towards black. I would say it was a failed idea, but I've shared it anyways. 
+
+```{r}
+classify_boot_blend(bidata, simpleplot4, n = 100, res = 101)+
+classify_boot_blend(bidata, simpleplot4, n = 100, res = 101, spectrum = "cmyk")
+```
+
+\newpage
+
+## Fade style
+
+As opposed to sharing the weighted average fill, you can instead present the 
+fill of the majority class, and then alpha blend by what percent of the bootstraps
+have that majority. Name is currently pending at fade. Perhaps proportion would be better?
+
+```{r}
+classify_boot_blend(bidata, simpleplot4, n = 100, res = 101, method = "lda", style = "fade")
+classify_boot_blend(bidata2, simpleplot5, n = 100, res = 101, method = "qda", style = "fade")
+```
+
+# Issue fixing
+
+## Issue 2
+
+I've been working on resolving the issues for ggclassify on github. Issue 2
+had already been started but i finished adding to documentation for vowel with
+a longer description of how they generated the data, and info on where it has been used.
+
+## Issue 4
+
+For the issue of certain classifiers failing on non-factor input. Previously I 
+had a CLI error that stopped the user and told them to supply a factor. I swapped
+it to automatically make the variable into a factor, but issue a CLI information
+warning that I have automatically converted their input. 
+
+## Issue 5
+
+I've been working on cleaning up the documentation to potentially merge class and
+class boundary. Ran into some issues along the way. 
+
+
