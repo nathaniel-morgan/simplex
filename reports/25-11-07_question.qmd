@@ -1,0 +1,113 @@
+---
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+# 25-11-07_question
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+theme_set(theme_minimal())
+theme_update(panel.grid.minor = element_blank())
+knitr::opts_chunk$set(warning = FALSE)
+library(ggclassify)
+library(simplex)
+library(patchwork)
+
+library(tidyclust)
+
+kmeans_spec_5 <- k_means(num_clusters = 5) |> set_engine("stats")
+
+set.seed(17)
+
+x <- rbind(matrix(rnorm(100, sd = 0.3), ncol = 2),
+           matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2))
+colnames(x) <- c("x", "y")
+cl <- kmeans(x, 5)
+```
+
+## Repeating the same plot with the same data, but getting different results
+
+### First run
+
+```{r, fig.width=8}
+kmeans_spec_5 <- k_means(num_clusters = 5) |> set_engine("stats")
+
+set.seed(17)
+
+x <- rbind(matrix(rnorm(100, sd = 0.3), ncol = 2),
+           matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2))
+colnames(x) <- c("x", "y")
+cl <- kmeans(x, 5)
+
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+```
+
+### Further repetition
+
+```{r, fig.width=8, echo=FALSE}
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+cl <- kmeans(x, 5)
+ggplot(x, aes(x,y))+
+  stat_point_cluster(method = kmeans_spec_5,
+                     aes(col = after_stat(cluster)))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+
+```
+
+Across all these plots there are a couple variations in how kmeans 
+works for tidyclust, despite using I believe the same kmeans code. 
