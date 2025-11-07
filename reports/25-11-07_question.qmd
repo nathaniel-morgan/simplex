@@ -8,18 +8,14 @@ editor_options:
 
 # 25-11-07_question
 
-```{r, echo=FALSE, message=FALSE}
+```{r, message=FALSE}
 library(tidyverse)
 theme_set(theme_minimal())
 theme_update(panel.grid.minor = element_blank())
 knitr::opts_chunk$set(warning = FALSE)
-library(ggclassify)
-library(simplex)
 library(patchwork)
 
 library(tidyclust)
-
-kmeans_spec_5 <- k_means(num_clusters = 5) |> set_engine("stats")
 ```
 
 ## Repeating the same plot with the same data, but getting different results
@@ -35,6 +31,7 @@ x <- rbind(matrix(rnorm(100, sd = 0.3), ncol = 2),
            matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2))
 colnames(x) <- c("x", "y")
 
+# Everything below this I reran before each plot. 
 
 cl <- kmeans(x, 5)
 mod <- fit(kmeans_spec_5, ~x+y, data=data.frame(x))
