@@ -25,8 +25,6 @@ library(tidyclust)
 ```{r, fig.width=8}
 kmeans_spec_5 <- k_means(num_clusters = 5) |> set_engine("stats")
 
-set.seed(17)
-
 x <- rbind(matrix(rnorm(100, sd = 0.3), ncol = 2),
            matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2))
 colnames(x) <- c("x", "y")
