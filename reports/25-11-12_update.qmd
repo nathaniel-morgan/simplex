@@ -1,0 +1,112 @@
+---
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+# 25-11-12_update
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+theme_set(theme_minimal())
+theme_update(panel.grid.minor = element_blank())
+knitr::opts_chunk$set(warning = FALSE)
+library(ggclassify)
+library(simplex)
+library(tidyclust)
+library(patchwork)
+
+set.seed(17)
+
+means <- cbind(x = runif(5,-1), y = runif(5,-1))
+samp <- rnorm_mixture(100, mean = means, var = .1)
+bidata <- tibble(x = samp[,1], y = samp[,2], class = attr(samp, "component"))
+simpleplot <- ggplot(bidata, aes(x, y, fill = class))+
+  geom_point_fill()
+```
+
+## Placing classes with non continuous color pallets next to each other
+
+```{r, fig.width=8}
+classify_boot_blend(bidata, simpleplot, n = 100, res = 101, method = "qda")+
+  theme(legend.position = "none")+
+ggplot(bidata, aes(x = x, y = y, fill = class))+
+  geom_classify(method = "qda")+
+  geom_point_fill() + plot_layout(guides = "collect", axes = "collect")
+```
+
+Same plot with KNN
+
+```{r, fig.width=8, echo=FALSE}
+classify_boot_blend(bidata, simpleplot, n = 100, res = 101, method = "knn")+
+  theme(legend.position = "none")+
+
+ggplot(bidata, aes(x = x, y = y, fill = class))+
+  geom_classify(method = "knn")+
+  geom_point_fill()+
+  plot_layout(guides = "collect", axes = "collect")
+```
+\newpage
+## Repeating those plots using the binned proportion of the plurality class.
+
+```{r, fig.width=8}
+classify_boot_blend(bidata, simpleplot, n = 100, res = 101, method = "qda", style = "fade")+
+  
+ggplot(bidata, aes(x = x, y = y, fill = class))+
+  geom_classify(method = "qda")+
+  theme(legend.position = "none")+
+  geom_point_fill() + plot_layout(guides = "collect", axes = "collect")
+```
+
+```{r, fig.width=8, echo=FALSE}
+classify_boot_blend(bidata, simpleplot, n = 100, res = 101, method = "knn", style = "fade")+
+
+ggplot(bidata, aes(x = x, y = y, fill = class))+
+  geom_classify(method = "knn")+
+  geom_point_fill()+
+  theme(legend.position = "none")+
+  plot_layout(guides = "collect", axes = "collect")
+```
+\newpage
+
+## geom_point_cluster
+
+```{r, fig.width=8, fig.height=6}
+kmeans_spec_5 <- k_means(num_clusters = 5) |> set_engine("stats")
+
+(ggplot(bidata, aes(x, y))+
+  geom_point_cluster(method = kmeans_spec_5))/
+(ggplot(bidata, aes(x, y))+
+  geom_point_fill(aes(fill = class)))
+```
+
+\newpage
+
+## geom_point_classify
+
+```{r, fig.width=8}
+ggplot(bidata, aes(x, y, fill = class))+
+  geom_point_classify()
+```
+
+color can be used instead of fill via the class afterstat
+
+```{r, fig.width=8}
+ggplot(bidata, aes(x, y, fill = class)) + 
+  stat_point_classify(geom = GeomPoint, aes(col = after_stat(class)), shape = 19)
+```
+
+\newpage
+
+An interesting way to see where the classifier fails is combining color and fill, or color and shape
+
+```{r, fig.width=8}
+ggplot(penguins, aes(bill_len, bill_dep, fill = species, col = species)) + 
+  geom_point_classify()
+```
+
+```{r, fig.width=8}
+ggplot(penguins, aes(bill_len, bill_dep, fill = species)) + 
+  stat_point_classify(geom = GeomPoint,
+                      aes(col = after_stat(class), shape = species))
+```
