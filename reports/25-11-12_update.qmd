@@ -110,3 +110,244 @@ ggplot(penguins, aes(bill_len, bill_dep, fill = species)) +
   stat_point_classify(geom = GeomPoint,
                       aes(col = after_stat(class), shape = species))
 ```
+
+\newpage
+
+## Returning to a class aesthetic?
+
+I went back through my previous implementation and was reminded of part of the reason
+we moved on from class as an aesthetic. It didn't properly produce a legend. The implementation
+looked like this.
+
+```{r, eval=FALSE}
+Statclassify <- ggproto("Statclassify", Stat,
+                            setup_params = cpt_par,
+                            setup_data = cpt_data,
+                            compute_panel = cpt_class,
+                            required_aes = c("x","y","class"),
+                            default_aes = aes(fill = ..fill..)
+)
+```
+
+I took in a class, but then internally computed a fill after stat and returned it. This plotted
+fine, but the legend didn't know to link class to fill. I tried to experiment with allowing for class and fill to both be supplied for `geom_point_classify`, but while i got it to plot fine, the legend wouldn't appear for class aesthetic. 
+
+```{r, include=FALSE}
+
+cpt_class <- function(data, scales, method, args=NULL, 
+                      mod = NULL, param = NULL) {
+  if (!"fill" %in% names(data) && "class" %in% names(data)) {
+    data$fill <- ggdistcol(length(levels(data$class)))[as.numeric(data$class)]
+  }
+  data <- do.call(get_classify,
+                  args = c(list(data = data, mesh = data, method = method,
+                                args = args), param))
+  if (!"class" %in% names(data)) cbind(data, class = data$fill) else data
+}
+
+
+
+
+cpt_par = function(data, params) {
+  #Default to LDA if nothing is given
+  if( is.null(params$method) ){
+    params$method <- "lda"
+  }
+  return(params)
+}
+
+
+
+
+
+cpt_data <- function(data, params) {
+  return(data)
+}
+
+#' @rdname geom_point_classify
+#' @export
+StatPointClassify <- ggproto("StatPointClassify", Stat,
+                        setup_params = cpt_par,
+                        setup_data = cpt_data,
+                        compute_panel = cpt_class,
+                        required_aes = c("x", "y"),
+                        computed_vars = c("class", "fill")
+)
+
+
+
+
+
+#' @rdname geom_point_classify
+#' @export
+stat_point_classify <- function(mapping = NULL, data = NULL, geom = GeomPointClassify,
+                          position = "identity", na.rm = FALSE, show.legend = NA, 
+                          inherit.aes = TRUE, method = NULL, param = NULL, ...) {
+  layer(
+    stat = StatPointClassify, data = data, mapping = mapping, geom = geom, 
+    position = position, show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, method = method, param = param, ...)    
+  )
+}
+
+
+
+
+#' @rdname geom_point_classify
+#' @export
+GeomPointClassify <- ggproto("GeomPointClassify", GeomPoint,
+                        default_aes = aes(
+                          shape = 21,
+                          colour = "black",
+                          size = 2,
+                          alpha = NA,
+                          stroke = .5,
+                          fill = "transparent"
+                        )
+)
+
+
+
+
+
+#' @rdname geom_point_classify
+#' @export
+geom_point_classify <- function(mapping = NULL, data = NULL, stat = StatPointClassify,
+                          position = "identity", na.rm = FALSE, 
+                          show.legend = NA, inherit.aes = TRUE, ...) {
+  ggplot2::layer(
+    geom = GeomPointClassify, mapping = mapping,  
+    data = data, stat = stat, position = position, 
+    show.legend = show.legend, inherit.aes = inherit.aes,
+    params = list(na.rm = na.rm, ...)
+  )
+}
+```
+
+## Is kmean working?
+
+Having read further on kmeans one of the two engines used is from the stats
+package of base R, so results should be the same. However their are a number of settings
+available to change that could improve performance. 
+
+### comparing base and tidyclust
+
+```{r, fig.width=8}
+kmeans_spec_5 <- k_means(num_clusters = 5) |> set_engine("stats")
+
+x <- rbind(matrix(rnorm(100, sd = 0.3), ncol = 2),
+           matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2))
+colnames(x) <- c("x", "y")
+
+# Everything below this I reran before each plot. 
+cl <- kmeans(x, 5)
+cl$centers
+mod <- fit(kmeans_spec_5, ~x+y, data=data.frame(x))
+df <- tibble(y = x[,2], x = x[,1], cluster = factor(extract_cluster_assignment(mod)$.cluster))
+
+ggplot(df, aes(x,y))+
+  geom_point(shape = 21, aes(col = cluster))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+dev.off()
+```
+
+### Further repetition
+
+```{r, fig.width=8, fig.height=3, echo=FALSE}
+cl <- kmeans(x, 5)
+mod <- fit(kmeans_spec_5, ~x+y, data=data.frame(x))
+df <- tibble(y = x[,2], x = x[,1], cluster = factor(extract_cluster_assignment(mod)$.cluster))
+
+ggplot(df, aes(x,y))+
+  geom_point(shape = 21, aes(col = cluster))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+```
+```{r, fig.width=8, fig.height=3, echo=FALSE}
+cl <- kmeans(x, 5)
+mod <- fit(kmeans_spec_5, ~x+y, data=data.frame(x))
+df <- tibble(y = x[,2], x = x[,1], cluster = factor(extract_cluster_assignment(mod)$.cluster))
+
+ggplot(df, aes(x,y))+
+  geom_point(shape = 21, aes(col = cluster))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+```
+```{r, fig.width=8, fig.height=3, echo=FALSE}
+cl <- kmeans(x, 5)
+mod <- fit(kmeans_spec_5, ~x+y, data=data.frame(x))
+df <- tibble(y = x[,2], x = x[,1], cluster = factor(extract_cluster_assignment(mod)$.cluster))
+
+ggplot(df, aes(x,y))+
+  geom_point(shape = 21, aes(col = cluster))+
+  theme(legend.position = "none")+
+~plot(x, col = cl$cluster)
+```
+
+Across all these plots there are a couple variations in results for both implementations for tidyclust. They do appear to work the same
+
+### improving performance
+
+It turns out the default parameters for kmeans are simply terrible, just by changing
+the number of starts to 10 instead of the default 1 performance seems much better
+
+```{r}
+kmeans_spec_5_improved <- k_means(num_clusters = 5) |> set_engine("stats", nstart = 10)
+```
+
+
+```{r, fig.width=8, fig.height=3, echo=FALSE}
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("old")+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5_improved) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("improved")+
+  plot_layout(guides = "collect", axes = "collect")
+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("old")+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5_improved) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("improved")+
+  plot_layout(guides = "collect", axes = "collect")
+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("old")+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5_improved) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("improved")+
+  plot_layout(guides = "collect", axes = "collect")
+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("old")+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5_improved) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("improved")+
+  plot_layout(guides = "collect", axes = "collect")
+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("old")+
+ggplot(df, aes(x,y)) + 
+  geom_cluster(method = kmeans_spec_5_improved) + 
+  geom_point(shape = 21, aes(fill = cluster))+
+  ggtitle("improved")+
+  plot_layout(guides = "collect", axes = "collect")
+```
+
+
+
