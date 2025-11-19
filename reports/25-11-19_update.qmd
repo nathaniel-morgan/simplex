@@ -1,0 +1,83 @@
+---
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+# 25-11-19_update
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+theme_set(theme_minimal())
+theme_update(panel.grid.minor = element_blank())
+knitr::opts_chunk$set(warning = FALSE)
+library(ggclassify)
+library(simplex)
+library(tidyclust)
+library(patchwork)
+
+set.seed(17)
+
+means <- cbind(x = runif(5,-1), y = runif(5,-1))
+samp <- rnorm_mixture(100, mean = means, var = .05)
+bidata <- tibble(x = samp[,1], y = samp[,2], class = attr(samp, "component"))
+simpleplot <- ggplot(bidata, aes(x, y, fill = class))+
+  geom_point_fill()
+```
+
+# Documenation work
+
+## Extensive Readme additions
+
+I have added quite a few additional plots the readme detailing how to use
+a variety of features and arguments available that were lacking in documentation.
+
+## Man pages
+
+I've tried to describe some arguments that were lacking descriptions in the man pages, but haven't yet found all arguments that need improved documentation. 
+
+I have not yet determined the best way to combine the 6 geoms I have created into fewer man pages.
+
+## cpt_function repeated overwriting
+
+I have ceased having many versions of the same cpt functions constantly overwriting each other.
+I now have an R script with all the more minor cpt functions, and have combined the cpt functions that were similar to each other so they could be shared by multiple geoms. Every unique cpt function left now also has a unique name so there is no overwriting. 
+
+# Bootstrapping work
+
+## geom_classify
+
+I have been able to port one of the two bootstrap styles into the geom itself. I have proportion working mostly fine, but I'm not sure how to create a discrete alpha legend key when i use it (outside of computing the alpha with the proportion after_stat after computation)
+
+Blending colors has caused issues due to the new fill column containing dozens to hundreds of unique fill values, that the legend would love to plot each and every one of obliterating the plot. I have not yet determined a way to suppress the legend fill output without messing up the legend of other geoms combined into the plot. 
+
+### proportion style
+
+```{r, fig.width=8}
+ggplot(bidata, aes(x, y, fill = class)) + 
+  geom_classify(method = "qda", boot = 50, boot_style = "proportion") + 
+  geom_point_fill() +
+  labs(title = "bootstrap proportion plot") 
+```
+
+### blend style (currently broken)
+
+```{r, fig.width=8}
+ggplot(penguins |> remove_missing(), aes(bill_len, bill_dep, fill = species)) + 
+  geom_classify(boot = 10, boot_style = "blend") +
+  geom_point_fill() +
+  labs(title = "bootstrap blend plot") 
+```
+
+## geom_classify_boundary
+
+With its much simpler visual style bootstrapping on the boundary has caused 
+no issues with the legend thankfully. 
+
+```{r}
+ggplot(bidata, aes(x, y, fill = class)) + 
+  geom_classify_boundary(method = "qda", boot = 50) + 
+  geom_point_fill() +
+  labs(title = "bootstrap border plot") 
+```
+
