@@ -43,6 +43,7 @@ I have not yet determined the best way to combine the 6 geoms I have created int
 I have ceased having many versions of the same cpt functions constantly overwriting each other.
 I now have an R script with all the more minor cpt functions, and have combined the cpt functions that were similar to each other so they could be shared by multiple geoms. Every unique cpt function left now also has a unique name so there is no overwriting. 
 
+\newpage
 # Bootstrapping work
 
 ## geom_classify
@@ -60,6 +61,7 @@ ggplot(bidata, aes(x, y, fill = class)) +
   labs(title = "bootstrap proportion plot") 
 ```
 
+\newpage
 ### blend style (currently broken)
 
 ```{r, fig.width=8}
@@ -69,6 +71,7 @@ ggplot(penguins |> remove_missing(), aes(bill_len, bill_dep, fill = species)) +
   labs(title = "bootstrap blend plot") 
 ```
 
+\newpage
 ## geom_classify_boundary
 
 With its much simpler visual style bootstrapping on the boundary has caused 
