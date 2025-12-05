@@ -1,0 +1,63 @@
+---
+format: pdf
+editor_options: 
+  chunk_output_type: console
+---
+
+# 25-12-05_update
+
+```{r, echo=FALSE, message=FALSE}
+library(tidyverse)
+theme_set(theme_minimal())
+theme_update(panel.grid.minor = element_blank())
+knitr::opts_chunk$set(warning = FALSE)
+library(ggclassify)
+library(simplex)
+library(tidyclust)
+library(tidymodels)
+library(patchwork)
+
+set.seed(17)
+```
+
+# Default Clustering behavior
+
+The available k means engines available with tidyclust require picking
+some number of clusters so the previous default was a rather arbitrary k = 3
+k means model if the user didn't supply a method. 
+
+To get a stronger default the new behavior if no method is supplied is 5 fold
+cross validation across k = 2 to 10, where the k with the highest average silhouette
+value is selected. The user is warned this was selected and that value is used
+to plot. 
+
+This does require tidymodels to use. 
+
+```{r, fig.width=8}
+samp <- rnorm_mixture(100, mean = roots_of_unity(5), var = .1)
+df <- data.frame(x = samp[,1], y = samp[,2], c = attr(samp, "component"))
+ggplot(df, aes(x, y))+
+  geom_cluster()+
+  geom_point(aes(col = c))
+```
+
+The model is pretty effective with Roots of Unity
+
+```{r, fig.width=8}
+set.seed(123)
+means <- cbind(x = runif(6,-1), y = runif(6,-1))
+samp <- rnorm_mixture(149, mean = means, var = .025)
+bidata <- tibble(x = samp[,1], y = samp[,2], c = attr(samp, "component"))
+ggplot(bidata, aes(x, y))+
+  geom_cluster()+
+  geom_point(aes(col = c))
+```
+
+More complex data can be difficult though.
+
+
+# Documentation work
+
+## Man pages
+
+I have condensed the documentation from `geom_classify`, `geom_classify_boundary`, and `geom_point_classify` into one page. as well as `geom_cluster`, `geom_cluster_boundary`, and `geom_point_cluster` into one page. This should help reduce the amount of copy paste documentation. I've further outlined the computed stats available to each geom. 
