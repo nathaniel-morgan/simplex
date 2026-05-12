@@ -55,6 +55,42 @@ ggplot(bidata, aes(x, y))+
 
 More complex data can be difficult though.
 
+I have my method for selecting k below. Not the most experience with
+building tidymodels so their could be inefficiencies. 
+
+```{r, eval=FALSE}
+get_best_kmeans <- function(data){
+  
+  data_cv <- vfold_cv(data, v = 5)
+  
+  data_rec <- step_normalize(recipe(~ x + y, data = data), all_predictors())
+  
+  kmeans_spec_tune <- set_engine(k_means(num_clusters = tune()), "stats", iter.max = 25, nstart = 3)
+  
+  kmeans_wflow <- add_model(add_recipe(workflow(), data_rec), kmeans_spec_tune)
+  
+  clust_metrics <- cluster_metric_set(silhouette_avg)
+  
+  data_tune <- tune_cluster(
+    kmeans_wflow,
+    resamples = data_cv,
+    grid = tibble(num_clusters = 2:10),
+    metrics = clust_metrics
+  )
+  
+  metrics_tbl <- collect_metrics(data_tune)
+
+  best_k <- metrics_tbl$num_clusters[which.max(metrics_tbl$mean)]
+  cli_alert_warning(paste0("a k means model with ", best_k ," clusters was used"))
+  set_engine(k_means(num_clusters = best_k), "stats", iter.max = 40, nstart = 10) 
+}
+```
+
+
+```{r}
+datasets::penguins |> remove_missing() |> mutate(x = bill_len, y = bill_dep) |> 
+  ggclassify:::get_best_kmeans()
+```
 
 # Documentation work
 
