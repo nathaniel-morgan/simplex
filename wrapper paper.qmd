@@ -13,7 +13,17 @@ header-includes:
 
 # Abstract
 
-\textcolor{magenta}{Can be easiest to do last}
+Wrapper functions are a common class of functions that convert many lines of code into a function
+with a few inputs for key modifications.
+Wrappers can greatly simplify using complex code, making it far more accessible to less experienced
+users.
+However, many possible modifications to the original code may become inaccessible, making edits not
+foreseen by the wrapper creator difficult to impossible for users.
+There are a few ways for wrapper creators to make future edits to their function easier.
+These start with the function being self-contained
+(\textcolor{magenta}{Do I put a definition for self-contained here? Or is it sufficient it is defined
+when brought up in the body of the paper?}), but also include a mechanism for users to view and edit
+code, and potentially even save their modified versions of the wrapper function for future use. 
 
 # What are Wrapper functions
 
@@ -34,7 +44,7 @@ models, assumptions about the data, clean the data, and return what it considers
 best-fitting model with very little user input.
 (\textcolor{magenta}{Are there other major uses I'm blanking on})
 
-## Popular examples - \textcolor{magenta}{(need to research more and better examples)}
+## Popular examples
 
 A popular class of wrapper functions helps users create complex ggplots involving multiple layers
 with as little as one line of code [@wickham2016ggplot2].
@@ -367,9 +377,16 @@ This final version is the easiest to reuse across sessions or share with another
 
 # Conclusion
 
-\textcolor{magenta}{Reiterate some points about the balance between simplicity and customizability
-of wrapper functions. Probably recommend something along the templating method approach since it
-strikes the best balance and enables reusing and sharing customizations in the easiest way.}
+Considering the pros and cons of the methods described, we would have to recommend the template
+method as being the most valuable for users.
+The ability to not just adjust a function, but save those adjustments in an easily reusable and
+shareable way, is valuable in any collaborative setting where wrapper functions are being used.
+One can easily imagine creating plot templates with colors adjusted to match a company or school
+theme and sharing them with colleagues.
+The difficulty of implementation is also not particularly higher than other simpler methods
+described.
+The largest barrier to entry for all methods described remains how self-contained a wrapper function
+is able to be, since code can only be edited if it is accessible to users. 
 
 # References
 
