@@ -1,69 +1,230 @@
 ---
-title: "wrapper_paper"
+title: "Wrapper Functions Basic Writeup"
+bibliography: references.bib
 format:
   pdf:
     pdf-engine: pdflatex
-editor_options: 
+editor_options:
   chunk_output_type: console
 header-includes:
-  - \usepackage{xcolor}
+  - \usepackage{fancyvrb}
+  - \DefineVerbatimEnvironment{fadecode}{Verbatim}{fontsize=\small, frame=single, commandchars=\\\[\]}
 ---
 
-# Wrapper Functions Background
+# Abstract
 
-## What are wrapper functions
-### Functions that try to make a complex process easy to run 
-### ggplot wrapper functions (the focus of this paper?)
+\textcolor{magenta}{Can be easiest to do last}
 
-## Advantages to wrappers
-### Complex analysis and plots can be created in one line by new user
-### examples of popular wrappers
+# What are Wrapper functions
 
-## How they can obscure user choice
-### plot and function parameters that arn't adjustable
-### example of wrapper plots that can be difficult to edit (time series comes to mind)
-### Complex crash messages that arn't clear about their source
+## Basic description
 
-# Issues with developing wrapper functions
+Wrapper functions are a broad category of functions that typically aim to take a more complex task and create a simple way of recreating it, often by limiting the number of required inputs (\textcolor{magenta}{This is pretty broad, should I focus on a more narrow category of wrapper functions. I kind of bounce back and forth between ones that generate figures and ones that generate models}). To accomplish this a more complex block of code is wrapped up in a function and many inputs have values selected by the creator. A few key inputs are left outward facing to be adjusted by the user with the wrapper function. However, many inputs may be permanently unadjustable by the user. Common uses for wrapper functions include complex graphics where there may be hundreds of lines of code, but only a couple are typically of interest to the user. Another common use is in modeling functions where a single function call may test a great number of models, assumptions about the data, clean the data, and return what it considers the be the best fitting model with very little user input. (\textcolor{magenta}{Are there other major uses I'm blanking on})
 
-## The balance between simplicity for user, and ability to customize.
-### More options for input can lead to increasing code complexity when trying to account for every combination
+## Popular examples - \textcolor{magenta}{(need to research more and better examples)}
 
-## Self contained versus non self contained wrapper functions?
-### Functions that call other functions
-#### Functions that call non-exported functions
-#### Functions that call C code. 
-### Functions that utilize S3 or other methods. 
+A popular class of wrapper functions are those that help users to create complex ggplots involving multiple layers with as little as one line of code [@wickham2016ggplot2]. A major example of this style is `autoplot()`, which uses the class of the object given to it to choose an appropriate ggplot display. This allows users to quickly plot objects like time series, model objects, or dimension reduction results without needing to know all of the individual ggplot layers being created. The **survminer** package provides a more domain-specific example with `ggsurvplot()`, a wrapper that builds survival curves from fitted survival objects and can add common survival-analysis features such as confidence intervals, censoring marks, p-values, and risk tables [@kassambara2026survminer]. The **ggpubr** package takes a broader plotting-helper approach, providing functions such as `ggboxplot()` and `ggscatter()` that wrap common ggplot patterns behind simple arguments for labels, grouping, colors, and statistical annotations [@kassambara2026ggpubr]. There are also packages created as companions for textbooks that often have wrapper functions to help create graphics like those seen in the book. The textbook **Time Series Analysis and Its Applications** [@shumway2025time] has its own package **astsa** with several wrappers for creating similar graphics, and for quickly determining models [@stoffer2025astsa]. Even on packages not focused on producing graphics they may have one or two wrappers for creating specific visuals related to the goal of their package.
 
-# Potential solutions to simplicity & Customization tradeoff
+Another important class of wrapper functions are involved in modeling. The **fable** package in time series has modeling functions that can take in as little as just a dataset and from there the function will make numerous decisions for the user to return to the user, what it determines to be the best model for their data [@oharawild2024fable]. (\textcolor{magenta}{Do I provide more modeling examples, do i provide more details.})
 
-## "original" method (Perhaps so simple that I just combine it and the name method which have very little difference)
-### The simplest default solution I originally developed
-### Runs into issues if making more than 1 or 2 custom plots
+## Advantages
 
-## name method
-### A slight improvement on that in the form of the "name" method
-### Alows for storing multiple different customized plots since each has seperate binding name
+The clear advantage to creating a wrapper function is enabling users to create complex figures or well fitted models with ease. For a user looking to complete a single application with as little friction as possible this is ideal. With a wrapper function the creator can enable beginner users to recreate their more advanced figures or models. This may be important if the user has colleagues that need to replicate work in a similar style since it reduces the expertise needed by the user, and increases consistency. If none of the inputs that have been fixed and become inaccessible to the user, then wrapper functions offer primarily upside. In some cases what would have been hundreds of lines of code becomes one.
 
-## binding method
-### Can utlize S3 print methods and is more explicit
-### Doesn't save lists into user global without their knowlege
+Outside of mere ease of use wrapper functions can allow a user to lean on the experience of the creator of the function. If the creator is an expert in the area their preselected values for inputs, or methods for automatically determining them, may be more reasonable than anything an inexperienced user could guess. The user is less likely to violate unknown assumptions if the function checks those itself. Core code may have even been converted into C or other faster running languages making the function faster than anything the user could easily write themselves.
 
-## template method
-### Uses .R files to store custom made templates for further use
+## Issues
 
-## Why i think the template method is the best
-### Templates can easily be shared between various users or stored between sessions
-### Easier to further edit an R file after saving as opposed to a list stored in your global
+Issues can begin to crop up if an input that was fixed by the creator is something you need to adjust. It could be as simple as switching the line colors of a plot to be more colorblind friendly. Depending on how the wrapper function was written, making minor adjustments can range from a slight inconvenience, to total nightmare as you try to navigate the depths of their package architecture searching for where the color of those lines was actually encoded. The simplest wrapper function is just a block of code that has been placed in a function. We call these styles of wrapper functions "self-contained" since the function itself contains everything it needs to function. Self-contained wrappers are very easy to adjust since you can take the block of code, create and create a new wrapper with the code slightly adjusted, or by just adding a new input to allow yourself to adjust what was previously fixed. Difficulties arise when the function is not self contained. The wrapper may call many other functions, each of which could conceivably contain the code you need to adjust, requiring you to search through all of them. Outside of just calling other functions the function could use S3, S4, or R6 giving it custom methods that could further adjust how the output looks. If the function calls compiled C code that contains what you want to adjust there may be nothing you can do outside of writing it all yourself or finding a new package.
 
-# Utilizing these solutionson pre - existing wrappers
+Beyond difficulty with modifying the function, wrapper functions can be very difficult to bugfix. The resulting error when something goes wrong can be very unclear particularly if the error is in another function called by the wrapper function. The user often struggles to determine if the issue is with their inputs, or if they are using the wrapper function incorrectly. The error may be fatally incomprehensible if the error is with a compiled C function.
 
-## Simple method for editing other functions
-### basic function that can pull code of a function into a new window for editing and saving a new version of that wrapper function
-### Will run into issues on any non-self contained wrapper function (many of them)
-### The best implementations will involve the author including these methods of editing themselves
+Finally if a user would like to use the output of the wrapper as part of some greater project, they may be unsure what they have actually done. (\textcolor{magenta}{There's plenty to be said about the user not really understanding their code and what they have really done, but is that something worth going down. My proposals in this paper don't really do anything to fix that issue.})
 
-## Not sure but If i try to make a roxygen tag it goes here
+# Ways to combat Basic Issues
 
-## how wrapper writers could utlize these potential solutions (This might should be done in the previous section as I explain the methods)
+Package creators typically create wrapper functions to make their code as usable for users as possible. So what steps exist to allow wrapper functions to be as simple and functional, but open to adjustment as possible. One unfortunate drawback to all the following methods is that they work better the more self contained the function is.
 
+## Original method
+
+One adjustment to allow users to make simple adjustments to function could be to have an argument that by default runs the wrapper as usual, but could be switched to instead of running the function print out the code to be run into a new document. Adjustments to the code could be made live before running it. This would be helpful for very minor changes like switching the color of a line in a plot, or changing a couple fixed numeric values. While this method is easy to implement and nice for single adjustments, it is inconvenient if a user would like to consistently make the same change when using the function a number of times.
+
+## Binding method
+
+While the method outlined in section a is nice for minor one off changes, it would be rather inconvenient if an adjustment was desired to be used regularly. If you want to use the wrapper function many times all with the same adjustment. To build off the previous method you could instead bind the adjusted code to a new object in the working environment. The wrapper function could be adjusted to take in modified code, and run it instead of its original. The user could then easily make their adjustment one time and continue to use their modified version of the original wrapper function. The wrapper function could even allow the name of the binding to be passed into the function itself and then assign it to the global after adjustments have been made. This creates a more semi-permanent solution, but the edited code living in the global environment requires the user to re-create it, or save it as an rds, between sessions. It also requires the creator to add several arguments to every wrapper function they would like to be editable by the user.
+
+## Template method
+
+The previous methods have both involved editing wrapper functions to both have their typical functions as well as arguments that give them editing functions. For a single wrapper this can be useful, but for a package containing multiple it may be cleaner to have a single editing function that works for all wrapper functions. In this method the code bodies of wrapper functions are stored in the package, and a dedicated templating function calls them into a new document. An argument for the template's name is given and when edits to the function are complete the edited code is saved as an rds, as opposed to just being in the global environment. These templates allow for long term use of modified code for the user, and even for templates to be shared between users if several would like to make the same adjustment. The only adjustment that needs to be made to the wrapper functions themselves in this method is allowing for a template to be provided, and the function running the template code instead.
+
+# How to Implement
+
+To give a running example of how this might work we've created a wrapper function called raincloud that takes in a tibble with 2 variables, value and class. The default wrapper produces a violin plot with jittered observations, a narrow boxplot, and a median point. 
+
+```{r, echo=FALSE}
+pkgload::load_all(".", quiet = TRUE)
+```
+
+
+```{r}
+#| label: raincloud-data
+#| message: false
+#| warning: false
+set.seed(17)
+a <- tibble::tibble(
+  value = c(rnorm(2e2, 1), 4 * rbeta(2e2, 1, 4)),
+  class = c(rep("a", 2e2), rep("b", 2e2))
+)
+```
+
+```{r}
+#| label: raincloud-default
+#| fig-cap: "Default raincloud wrapper output."
+raincloud_original(x = a)
+```
+
+## Original method
+
+The original method is intended for a one-off change. The user first runs the plot in its default form, but finds that its hard to see the points with the boxplot on top of them. To make an adjustment they can rerun the function with format set to edit. 
+
+\begin{fadecode}
+\color[gray]raincloud_original(x = a)
+\color[black]raincloud_original(x = a, format = "edit")
+\end{fadecode}
+
+Running `raincloud_original(x = a, format = "edit")` opens an unnamed R script containing the internal plotting code wrapped as editable code. The script begins with a short message describing how to edit and then assigns the code to `code_output$code`. To make the points clearer, the user swaps the order of the jitter and boxplot layers. 
+
+\begin{fadecode}
+\color[black]code_output$code <- expr({print(
+\color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
+\color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+\color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+\color[black]    geom_jitter(width = 0.12, alpha = 0.35, size = 1.2)+
+\color[gray]    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+\color[gray]    labs(x = NULL, y = NULL)+
+\color[gray]    theme_minimal()+
+\color[gray]    theme(legend.position = "none")
+\color[gray]})
+\end{fadecode}
+
+After making the change, the user runs the edited block once to save the revised code object. Then they call `raincloud_adjust()` to evaluate the modified version in the original function environment.
+
+\begin{fadecode}
+\color[black]raincloud_adjust()
+\end{fadecode}
+
+```{r}
+#| label: raincloud-original-adjusted
+#| fig-cap: "Original-method edit: the boxplot is drawn behind the jittered points."
+#| echo: false
+ggplot(a, aes(x = class, y = value, fill = class, color = class))+
+  geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+  geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+  geom_jitter(width = 0.12, alpha = 0.35, size = 1.2)+
+  stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+  labs(x = NULL, y = NULL)+
+  theme_minimal()+
+  theme(legend.position = "none")
+```
+
+This method is simple, but the modified code lives in the default `code_output` object. If the user wants several different edited versions, or wants to name a particular version, the next method is more convenient.
+
+## Binding method
+
+The user finds that points are a little clearer now that they are on top, but that the color blends into the violin plot background. They decide they would like to change the shape of the points and make them black so they stand out better. In case they want to make further adjustments to the code they use the binding method and assign it as black_points in the local environment. 
+
+\begin{fadecode}
+\color[gray]raincloud_binding(x = a)
+\color[black]black_points <- raincloud_binding(x = a, format = "edit")
+\end{fadecode}
+
+The editable script again contains the plot code, but the wrapper returns an object with class `bnd`. The user fills in the object name on the left side of `$code`, edits the plot code, and runs the block.
+
+\begin{fadecode}
+\color[black]black_points$code <- expr({print(
+\color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
+\color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+\color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+\color[black]    geom_jitter(width = 0.12, alpha = 0.35, shape = 5, color = "black")+
+\color[gray]    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+\color[gray]    labs(x = NULL, y = NULL)+
+\color[gray]    theme_minimal()+
+\color[gray]    theme(legend.position = "none")
+\color[gray]})
+\end{fadecode}
+
+Because `black_points` has a print method, the user can display the modified plot by evaluating the object itself.
+
+\begin{fadecode}
+\color[black]black_points
+\end{fadecode}
+
+```{r}
+#| label: raincloud-binding-adjusted
+#| fig-cap: "Binding-method edit: jittered points are drawn on top as black diamonds."
+#| echo: false
+ggplot(a, aes(x = class, y = value, fill = class, color = class))+
+  geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+  geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+  geom_jitter(width = 0.12, alpha = 0.35, shape = 5, color = "black")+
+  stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+  labs(x = NULL, y = NULL)+
+  theme_minimal()+
+  theme(legend.position = "none")
+```
+
+The adjusted version now has a name in the user's workspace, so they won't have to worry about overwriting it. The limitation is that it still lives inside the current R session unless the user saves it separately.
+
+## Template method
+
+The template method makes the edited version more durable. Instead of storing the changed code only in the current environment, the user creates an editable `.R` template file:
+
+\begin{fadecode}
+\color[black]make_template("raincloud", "clearer_points")
+\end{fadecode}
+
+This copies the package's raincloud plotting template into `clearer_points.R` and opens it for editing. The user can then apply the previous two changes and make one additional adjustment: increasing the jitter width from `0.12` to `0.35`, giving the diamond points more horizontal room to spread out.
+
+\begin{fadecode}
+\color[gray]print(
+\color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
+\color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+\color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+\color[black]    geom_jitter(width = 0.35, alpha = 0.35, shape = 5, color = "black")+
+\color[gray]    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+\color[gray]    labs(x = NULL, y = NULL)+
+\color[gray]    theme_minimal()+
+\color[gray]    theme(legend.position = "none")
+\color[gray])
+\end{fadecode}
+
+Once the file is saved, the wrapper can use the modified template directly:
+
+\begin{fadecode}
+\color[black]raincloud_template(a, "clearer_points.R")
+\end{fadecode}
+
+```{r}
+#| label: raincloud-template-adjusted
+#| fig-cap: "Template-method edit: previous edits plus wider jitter spacing."
+#| echo: false
+ggplot(a, aes(x = class, y = value, fill = class, color = class))+
+  geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+  geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+  geom_jitter(width = 0.35, alpha = 0.35, shape = 5, color = "black")+
+  stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+  labs(x = NULL, y = NULL)+
+  theme_minimal()+
+  theme(legend.position = "none")
+```
+
+This final version is the easiest to reuse across sessions or share with another user. 
+
+# Conclusion
+
+\textcolor{magenta}{Reiterate some points about the balance between simplicity and customizability of wrapper functions. Probably recommend something along the templating method approach since it strikes the best balance and enables reusing and sharing customizations in the easiest way.}
+
+# References
+
+::: {#refs}
+:::

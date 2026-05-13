@@ -57,7 +57,7 @@ boxplot_template <- function(
 #' @export
 #'
 make_template <- function(fun = NULL, template_name = "basic"){
-  if(fun %in% c("boxplot", "weather")){
+  if(fun %in% c("boxplot", "raincloud", "weather")){
     src <- system.file("extdata", paste0(fun, ".R"), package = "simplex")
     dest <- paste0(template_name, ".R")
     file.copy(src, dest, overwrite = FALSE)
