@@ -295,9 +295,8 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   theme(legend.position = "none")
 ```
 
-This method is simple, but the modified code lives in the default `code_output` object.
-If the user wants several different edited versions, or wants to name a particular version, the next
-method is more convenient.
+since the modified code lives in the default `code_output` object, creating a new version of the wrapper function will overwrite it.
+If the user wants several different edited versions with their own names, the next method is more convenient.
 
 ## Binding method
 
@@ -378,13 +377,11 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   theme(legend.position = "none")
 ```
 
-The adjusted version now has a name in the user's workspace, so they won't have to worry about
-overwriting it if they make other variants of this wrapper function.
-The limitation is that it still lives inside the current R session unless the user saves it separately.
+One limitation is that modified code still lives inside the current R session unless the user saves it separately. For a more permanent solution a user could use the following method. 
 
 ## Template method
 
-For the template method, the creator uses an additional function that can create new templates for every wrapper function in the package. 
+For the template method, the creator uses an additional function that can generate new templates for every wrapper function in the package. 
 
 ```r
 make_template <- function(fun = NULL, template_name = "basic") {
@@ -398,7 +395,7 @@ make_template <- function(fun = NULL, template_name = "basic") {
 ```
 
 The wrapper itself then needs only a small branch that runs the normal plot when no template is
-provided, or sources the user's edited template when one is provided:
+provided, or sources the user's edited template when one is provided.
 
 ```r
 raincloud_template <- function(x, template = NULL) {
@@ -410,19 +407,16 @@ raincloud_template <- function(x, template = NULL) {
 }
 ```
 
-The template file contains the plot code that the user is meant to edit.
+The template file contains the plot code that the user is meant to edit. It is more durable since modified code is stored in an editable `.R` file.
 Because the template is sourced locally, it can still use objects from inside the wrapper function.
 
-The template method makes the edited version more durable.
-Instead of storing the changed code only in the current environment, the user creates an editable `.R` template file.
-The user decides that they would like to make one more adjustment, but decide to store it as a template for sharing.
+The user decides that they would like to make one more adjustment, but decide to store it as a template for sharing. They name it clearer points since all their adjustment make it easier to see the points than in the original wrapper function.
 
 \begin{fadecode}
 \color[black]make_template("raincloud", "clearer_points")
 \end{fadecode}
 
-This copies the package's raincloud plotting template into `clearer_points.R` and opens it for
-editing.
+This copies the package's raincloud plotting template into `clearer_points.R` and opens it for editing.
 The user can then apply the previous two changes and make one additional adjustment: increasing the
 jitter width from `0.12` to `0.35`, giving the diamond points more horizontal room to spread out.
 
@@ -439,7 +433,7 @@ jitter width from `0.12` to `0.35`, giving the diamond points more horizontal ro
 \color[gray])
 \end{fadecode}
 
-Once the file is saved, the wrapper can use the modified template directly:
+Once the file is saved, the wrapper can use the modified template directly.
 
 \begin{fadecode}
 \color[black]raincloud_template(a, "clearer_points.R")
@@ -458,8 +452,6 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   theme_minimal()+
   theme(legend.position = "none")
 ```
-
-This final version is the easiest to reuse across sessions or share with another user. 
 
 # Conclusion
 
