@@ -212,7 +212,40 @@ a <- tibble::tibble(
 raincloud_original(x = a)
 ```
 
+The following methods also utilize copies of each function being stored in the extdata folder of the package so that they can easily be read for editing. 
+
 ## Original method
+
+For the original method, the package creator first adds an argument such as `format` to the wrapper. this argument writes a copy of the
+template code into a new R script.
+
+```r
+if (format == "plot") eval(code_output)
+else if (format == "edit") {
+  output <- glue(
+    "# Explanation of how to edit the code here \n\n",
+    "code_output$code <- ", "expr({{",
+    system.file("extdata", "raincloud.R", package = "package name") |>
+      readLines() |>
+      paste(collapse = "\n"),
+    "}})"
+  )
+  rstudioapi::documentNew(
+    text = output,
+    type = "r"
+  )
+  assign(
+    "code_output",
+    list(code = code_output, env = environment()),
+    envir = .GlobalEnv
+  )
+}
+```
+
+This creates the editable script for the user and stores both the plot code and the wrapper's
+environment in `code_output`.
+The stored environment is important because it lets the edited code use objects created inside the
+wrapper function, such as processed versions of the input data.
 
 The original method is intended for a one-off change.
 The user first runs the plot in its default form, but finds that it's hard to see the points with the
@@ -224,14 +257,11 @@ To make an adjustment they can rerun the function with format set to `"edit"`.
 \color[black]raincloud_original(x = a, format = "edit")
 \end{fadecode}
 
-Running `raincloud_original(x = a, format = "edit")` opens an unnamed R script containing the
-internal plotting code wrapped as editable code.
-The script begins with a short message describing how to edit and then assigns the code to
-`code_output$code`.
+Running `raincloud_original(x = a, format = "edit")` opens an unnamed R script containing the following code.
 To make the points clearer, the user swaps the order of the jitter and boxplot layers. 
 
 \begin{fadecode}
-\color[black]code_output$code <- expr({print(
+\color[black]code_output\$code <- expr({print(
 \color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
 \color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
 \color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
@@ -271,12 +301,40 @@ method is more convenient.
 
 ## Binding method
 
+The binding method keeps the same basic edit branch, but returns an object to be
+assigned as opposed to just saving to the global environment.
+As a slight improvement a bnd class was created with a print method
+that takes the code of the object and evaluates it in the
+stored environment.
+
+```r
+if (format == "plot") eval(code_output)
+else if (format == "edit") {
+  output <- glue(
+    "# Fill in the object name to the left of $code \n\n",
+    "$code <- ", "expr({{",
+    system.file("extdata", "raincloud.R", package = "package name") |>
+      readLines() |>
+      paste(collapse = "\n"),
+    "}})"
+  )
+  rstudioapi::documentNew(
+    text = output,
+    type = "r"
+  )
+  bnd(list(code = code_output, env = environment()))
+}
+```
+
+This means the user can save the returned object under a meaningful name, edit its `$code` slot, and
+then print the object to evaluate the modified code in the original function environment.
+
 The user finds that points are a little clearer now that they are on top, but that the color blends
 into the violin plot background.
 They decide they would like to change the shape of the points and make them black so they stand out
 better.
 In case they want to make further adjustments to the code, they use the binding method and assign it
-to `black_points` in the local environment. 
+to `black_points` in the global environment. 
 
 \begin{fadecode}
 \color[gray]raincloud_binding(x = a)
@@ -288,7 +346,7 @@ The user fills in the object name on the left side of `$code`, edits the plot co
 block.
 
 \begin{fadecode}
-\color[black]black_points$code <- expr({print(
+\color[black]black_points\$code <- expr({print(
 \color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
 \color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
 \color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
@@ -321,15 +379,43 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
 ```
 
 The adjusted version now has a name in the user's workspace, so they won't have to worry about
-overwriting it.
-The limitation is that it still lives inside the current R session unless the user saves it
-separately.
+overwriting it if they make other variants of this wrapper function.
+The limitation is that it still lives inside the current R session unless the user saves it separately.
 
 ## Template method
 
+For the template method, the creator uses an additional function that can create new templates for every wrapper function in the package. 
+
+```r
+make_template <- function(fun = NULL, template_name = "basic") {
+  if (fun %in% c("raincloud")) {
+    src <- system.file("extdata", paste0(fun, ".R"), package = "package name")
+    dest <- paste0(template_name, ".R")
+    file.copy(src, dest, overwrite = FALSE)
+    invisible(rstudioapi::navigateToFile(dest))
+  }
+}
+```
+
+The wrapper itself then needs only a small branch that runs the normal plot when no template is
+provided, or sources the user's edited template when one is provided:
+
+```r
+raincloud_template <- function(x, template = NULL) {
+  if (is.null(template)) {
+    # default plotting code
+  } else {
+    source(template, local = TRUE)
+  }
+}
+```
+
+The template file contains the plot code that the user is meant to edit.
+Because the template is sourced locally, it can still use objects from inside the wrapper function.
+
 The template method makes the edited version more durable.
-Instead of storing the changed code only in the current environment, the user creates an editable `.R`
-template file:
+Instead of storing the changed code only in the current environment, the user creates an editable `.R` template file.
+The user decides that they would like to make one more adjustment, but decide to store it as a template for sharing.
 
 \begin{fadecode}
 \color[black]make_template("raincloud", "clearer_points")
