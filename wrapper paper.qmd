@@ -13,180 +13,114 @@ header-includes:
 
 # Abstract
 
-Wrapper functions are a common class of functions that convert many lines of code into a function
-with a few inputs for key modifications.
-Wrappers can greatly simplify using complex code, making it far more accessible to less experienced
-users.
-However, many possible modifications to the original code may become inaccessible, making edits not
-foreseen by the wrapper creator difficult to impossible for users.
+Wrapper functions are a common class of functions that convert many lines of code into a function with a few inputs for key modifications.
+Wrappers can greatly simplify using complex code, making it far more accessible to less experienced users.
+However, many possible modifications to the original code may become inaccessible, making edits not foreseen by the wrapper creator difficult to impossible for users.
 There are a few ways for wrapper creators to make future edits to their function easier.
-These start with the function being self-contained
-(\textcolor{magenta}{Do I put a definition for self-contained here? Or is it sufficient it is defined
-when brought up in the body of the paper?}), but also include a mechanism for users to view and edit
-code, and potentially even save their modified versions of the wrapper function for future use. 
+These start with the function being self-contained, but also include a mechanism for users to view and edit code, and potentially even save their modified versions of the wrapper function for future use.
+(\textcolor{magenta}{Do I put a definition for self-contained here?
+Or is it sufficient it is defined when brought up in the body of the paper?})
 
 # What are Wrapper functions
 
 ## Basic description
 
-Wrapper functions are a broad category of functions that typically aim to take a more complex task
-and create a simple way of recreating it, often by limiting the number of required inputs
+Wrapper functions are a broad category of functions that typically aim to take a more complex task and create a simple way of recreating it, often by limiting the number of required inputs.
 (\textcolor{magenta}{This is pretty broad, I should switch this section to focus more specifically on ggplot wrapper function extensions.})
-To accomplish this, a more complex block of code is wrapped up in a function and many inputs have
-values selected by the creator.
+To accomplish this, a more complex block of code is wrapped up in a function and many inputs have values selected by the creator.
 A few key inputs are left outward-facing to be adjusted by the user with the wrapper function.
 However, many inputs may be permanently unadjustable by the user.
-Common uses for wrapper functions include complex graphics where there may be hundreds of lines of
-code, but only a couple are typically of interest to the user.
-Another common use is in modeling functions where a single function call may test a great number of
-models, assumptions about the data, clean the data, and return what it considers to be the
-best-fitting model with very little user input.
+Common uses for wrapper functions include complex graphics where there may be hundreds of lines of code, but only a couple are typically of interest to the user.
+Another common use is in modeling functions where a single function call may test a great number of models, assumptions about the data, clean the data, and return what it considers to be the best-fitting model with very little user input.
 (\textcolor{magenta}{Are there other major uses I'm blanking on})
 
 ## Popular examples
 
-A popular class of wrapper functions helps users create complex ggplots involving multiple layers
-with as little as one line of code [@wickham2016ggplot2].
-A major example of this style is `autoplot()`, which uses the class of the object given to it to
-choose an appropriate ggplot display.
-This allows users to quickly plot objects like time series, model objects, or dimension reduction
-results without needing to know all of the individual ggplot layers being created.
-The **survminer** package provides a more domain-specific example with `ggsurvplot()`, a wrapper
-that builds survival curves from fitted survival objects and can add common survival-analysis
-features such as confidence intervals, censoring marks, p-values, and risk tables
-[@kassambara2026survminer].
-The **ggpubr** package takes a broader plotting-helper approach, providing functions such as
-`ggboxplot()` and `ggscatter()` that wrap common ggplot patterns behind simple arguments for labels,
-grouping, colors, and statistical annotations [@kassambara2026ggpubr].
-There are also packages created as companions for textbooks that often have wrapper functions to
-help create graphics like those seen in the book.
-The textbook **Time Series Analysis and Its Applications** [@shumway2025time] has its own package
-**astsa** with several wrappers for creating similar graphics, and for quickly determining models
-[@stoffer2025astsa].
-Even packages not focused on producing graphics may have one or two wrappers for creating specific
-visuals related to the goal of their package.
+A popular class of wrapper functions helps users create complex ggplots involving multiple layers with as little as one line of code [@wickham2016ggplot2].
+A major example of this style is `autoplot()`, which uses the class of the object given to it to choose an appropriate ggplot display.
+This allows users to quickly plot objects like time series, model objects, or dimension reduction results without needing to know all of the individual ggplot layers being created.
+The **survminer** package provides a more domain-specific example with `ggsurvplot()`, a wrapper that builds survival curves from fitted survival objects and can add common survival-analysis features such as confidence intervals, censoring marks, p-values, and risk tables [@kassambara2026survminer].
+The **ggpubr** package takes a broader plotting-helper approach, providing functions such as `ggboxplot()` and `ggscatter()` that wrap common ggplot patterns behind simple arguments for labels, grouping, colors, and statistical annotations [@kassambara2026ggpubr].
+There are also packages created as companions for textbooks that often have wrapper functions to help create graphics like those seen in the book.
+The textbook **Time Series Analysis and Its Applications** [@shumway2025time] has its own package **astsa** with several wrappers for creating similar graphics, and for quickly determining models [@stoffer2025astsa].
+Even packages not focused on producing graphics may have one or two wrappers for creating specific visuals related to the goal of their package.
 
 Another important class of wrapper functions is involved in modeling.
-The **fable** package in time series has modeling functions that can take in as little as just a
-dataset and from there the function will make numerous decisions for the user to return what it
-determines to be the best model for their data [@oharawild2024fable].
+The **fable** package in time series has modeling functions that can take in as little as just a dataset and from there the function will make numerous decisions for the user to return what it determines to be the best model for their data [@oharawild2024fable].
 
 ## Advantages
 
-The clear advantage to creating a wrapper function is enabling users to create complex figures or
-well-fitted models with ease.
+The clear advantage to creating a wrapper function is enabling users to create complex figures or well-fitted models with ease.
 For a user looking to complete a single application with as little friction as possible this is ideal.
-With a wrapper function the creator can enable beginner users to recreate their more advanced figures
-or models.
-This may be important if the user has colleagues that need to replicate work in a similar style,
-since it reduces the expertise needed by the user, and increases consistency.
-If none of the inputs have been fixed and made inaccessible to the user, then wrapper functions offer
-primarily upside.
+With a wrapper function the creator can enable beginner users to recreate their more advanced figures or models.
+This may be important if the user has colleagues that need to replicate work in a similar style, since it reduces the expertise needed by the user, and increases consistency.
+If none of the inputs have been fixed and made inaccessible to the user, then wrapper functions offer primarily upside.
 In some cases what would have been hundreds of lines of code becomes one.
 
-Outside of mere ease of use, wrapper functions can allow a user to lean on the experience of the
-creator of the function.
-If the creator is an expert in the area, their preselected values for inputs, or methods for
-automatically determining them, may be more reasonable than anything an inexperienced user could
-guess.
+Outside of mere ease of use, wrapper functions can allow a user to lean on the experience of the creator of the function.
+If the creator is an expert in the area, their preselected values for inputs, or methods for automatically determining them, may be more reasonable than anything an inexperienced user could guess.
 The user is less likely to violate unknown assumptions if the function checks those itself.
-Core code may have even been converted into C or other faster running languages, making the function
-faster than anything the user could easily write themselves.
+Core code may have even been converted into C or other faster running languages, making the function faster than anything the user could easily write themselves.
 
 ## Issues
 
-Issues can begin to crop up if an input that was fixed by the creator is something you need to
-adjust.
+Issues can begin to crop up if an input that was fixed by the creator is something you need to adjust.
 It could be as simple as switching the line colors of a plot to be more colorblind friendly.
-Depending on how the wrapper function was written, making minor adjustments can range from a slight
-inconvenience to a total nightmare as you try to navigate the depths of their package architecture
-searching for where the color of those lines was actually encoded.
+Depending on how the wrapper function was written, making minor adjustments can range from a slight inconvenience to a total nightmare as you try to navigate the depths of their package architecture searching for where the color of those lines was actually encoded.
 The simplest wrapper function is just a block of code that has been placed in a function.
-We call these styles of wrapper functions "self-contained" since the function itself contains
-everything it needs to function.
-Self-contained wrappers are very easy to adjust since you can take the block of code and create a new
-wrapper with the code slightly adjusted, or by just adding a new input to allow yourself to adjust
-what was previously fixed.
+We call these styles of wrapper functions "self-contained" since the function itself contains everything it needs to function.
+Self-contained wrappers are very easy to adjust since you can take the block of code and create a new wrapper with the code slightly adjusted, or by just adding a new input to allow yourself to adjust what was previously fixed.
 Difficulties arise when the function is not self-contained.
-The wrapper may call many other functions, each of which could conceivably contain the code you need
-to adjust, requiring you to search through all of them.
-Outside of just calling other functions, the function could use S3, S4, or R6, giving it custom
-methods that could further adjust how the output looks.
-If the function calls compiled C code that contains what you want to adjust, there may be nothing you
-can do outside of writing it all yourself or finding a new package.
+The wrapper may call many other functions, each of which could conceivably contain the code you need to adjust, requiring you to search through all of them.
+Outside of just calling other functions, the function could use S3, S4, or R6, giving it custom methods that could further adjust how the output looks.
+If the function calls compiled C code that contains what you want to adjust, there may be nothing you can do outside of writing it all yourself or finding a new package.
 
 Beyond difficulty with modifying the function, wrapper functions can be very difficult to bug fix.
-The resulting error when something goes wrong can be very unclear, particularly if the error is in
-another function called by the wrapper function.
-The user often struggles to determine if the issue is with their inputs, or if they are using the
-wrapper function incorrectly.
+The resulting error when something goes wrong can be very unclear, particularly if the error is in another function called by the wrapper function.
+The user often struggles to determine if the issue is with their inputs, or if they are using the wrapper function incorrectly.
 The error may be fatally incomprehensible if the error is with a compiled C function.
 
-Finally, if a user would like to use the output of the wrapper as part of some greater project, they
-may be unsure what they have actually done.
-(\textcolor{magenta}{There's plenty to be said about the user not really understanding their code
-and what they have really done, but is that something worth going down. My proposals in this paper
-don't really do anything to fix that issue.})
+Finally, if a user would like to use the output of the wrapper as part of some greater project, they may be unsure what they have actually done.
+(\textcolor{magenta}{There's plenty to be said about the user not really understanding their code and what they have really done, but is that something worth going down.
+My proposals in this paper don't really do anything to fix that issue.})
 
 # Ways to combat Basic Issues
 
-Package creators typically create wrapper functions to make their code as usable for users as
-possible.
-So, what steps exist to allow wrapper functions to be as simple and functional, but open to
-adjustment as possible?
-One unfortunate drawback to all the following methods is that they work better the more
-self-contained the function is.
+Package creators typically create wrapper functions to make their code as usable for users as possible.
+So, what steps exist to allow wrapper functions to be as simple and functional, but open to adjustment as possible?
+One unfortunate drawback to all the following methods is that they work better the more self-contained the function is.
 
 ## Original method
 
-One adjustment to allow users to make simple adjustments to a function could be to have an argument
-that by default runs the wrapper as usual, but could be switched to print out the code to be run in a
-new document instead of running the function.
+One adjustment to allow users to make simple adjustments to a function could be to have an argument that by default runs the wrapper as usual, but could be switched to print out the code to be run in a new document instead of running the function.
 Adjustments to the code could be made live before running it.
-This would be helpful for very minor changes like switching the color of a line in a plot, or
-changing a couple fixed numeric values.
-While this method is easy to implement and nice for single adjustments, it is inconvenient if a user
-would like to consistently make the same change when using the function a number of times.
+This would be helpful for very minor changes like switching the color of a line in a plot, or changing a couple fixed numeric values.
+While this method is easy to implement and nice for single adjustments, it is inconvenient if a user would like to consistently make the same change when using the function a number of times.
 
 ## Binding method
 
-While the method outlined in section a is nice for minor one-off changes, it would be rather
-inconvenient if an adjustment was desired to be used regularly.
-This is especially true if you want to use the wrapper function many times, all with the same
-adjustment.
-To build off the previous method, you could instead bind the adjusted code to a new object in the
-working environment.
+While the method outlined in section a is nice for minor one-off changes, it would be rather inconvenient if an adjustment was desired to be used regularly.
+This is especially true if you want to use the wrapper function many times, all with the same adjustment.
+To build off the previous method, you could instead bind the adjusted code to a new object in the working environment.
 The wrapper function could be adjusted to take in modified code and run it instead of its original.
-The user could then easily make their adjustment one time and continue to use their modified version
-of the original wrapper function.
-The wrapper function could even allow the name of the binding to be passed into the function itself
-and then assign it to the global environment after adjustments have been made.
-This creates a more semi-permanent solution, but the edited code living in the global environment
-requires the user to re-create it, or save it as an RDS, between sessions.
-It also requires the creator to add several arguments to every wrapper function they would like to be
-editable by the user.
+The user could then easily make their adjustment one time and continue to use their modified version of the original wrapper function.
+The wrapper function could even allow the name of the binding to be passed into the function itself and then assign it to the global environment after adjustments have been made.
+This creates a more semi-permanent solution, but the edited code living in the global environment requires the user to re-create it, or save it as an RDS, between sessions.
+It also requires the creator to add several arguments to every wrapper function they would like to be editable by the user.
 
 ## Template method
 
-The previous methods have both involved editing wrapper functions to have their typical functions as
-well as arguments that give them editing functions.
-For a single wrapper this can be useful, but for a package containing multiple it may be cleaner to
-have a single editing function that works for all wrapper functions.
-In this method the code bodies of wrapper functions are stored in the package, and a dedicated
-templating function calls them into a new document.
-An argument for the template's name is given, and when edits to the function are complete the edited
-code is saved as an RDS, as opposed to just being in the global environment.
-These templates allow for long-term use of modified code for the user, and even for templates to be
-shared between users if several would like to make the same adjustment.
-The only adjustment that needs to be made to the wrapper functions themselves in this method is
-allowing for a template to be provided and running the template code instead.
+The previous methods have both involved editing wrapper functions to have their typical functions as well as arguments that give them editing functions.
+For a single wrapper this can be useful, but for a package containing multiple it may be cleaner to have a single editing function that works for all wrapper functions.
+In this method the code bodies of wrapper functions are stored in the package, and a dedicated templating function calls them into a new document.
+An argument for the template's name is given, and when edits to the function are complete the edited code is saved as an RDS, as opposed to just being in the global environment.
+These templates allow for long-term use of modified code for the user, and even for templates to be shared between users if several would like to make the same adjustment.
+The only adjustment that needs to be made to the wrapper functions themselves in this method is allowing for a template to be provided and running the template code instead.
 
 # How to Implement
 
-To give a running example of how this might work, we've created a wrapper function called raincloud
-that takes in a tibble with two variables, value and class.
-The default wrapper produces a violin plot with jittered observations, a narrow boxplot, and a median
-point. 
+To give a running example of how this might work, we've created a wrapper function called raincloud that takes in a tibble with two variables, value and class.
+The default wrapper produces a violin plot with jittered observations, a narrow boxplot, and a median point.
 
 ```{r, echo=FALSE}
 pkgload::load_all(".", quiet = TRUE)
@@ -210,12 +144,12 @@ a <- tibble::tibble(
 raincloud_original(x = a)
 ```
 
-The following methods also utilize copies of each function being stored in the extdata folder of the package so that they can easily be read for editing. 
+The following methods also utilize copies of each function being stored in the extdata folder of the package so that they can easily be read for editing.
 
 ## Original method
 
-For the original method, the package creator first adds an argument such as `format` to the wrapper. this argument writes a copy of the
-template code into a new R script.
+For the original method, the package creator first adds an argument such as `format` to the wrapper.
+this argument writes a copy of the template code into a new R script.
 
 ```r
 if (format == "plot") eval(code_output)
@@ -240,15 +174,12 @@ else if (format == "edit") {
 }
 ```
 
-This creates the editable script for the user and stores both the plot code and the wrapper's
-environment in `code_output`.
-The stored environment is important because it lets the edited code use objects created inside the
-wrapper function, such as processed versions of the input data.
+This creates the editable script for the user and stores both the plot code and the wrapper's environment in `code_output`.
+The stored environment is important because it lets the edited code use objects created inside the wrapper function, such as processed versions of the input data.
 
 The original method is intended for a one-off change.
-The user first runs the plot in its default form, but finds that it's hard to see the points with the
-boxplot on top of them.
-To make an adjustment they can rerun the function with format set to `"edit"`. 
+The user first runs the plot in its default form, but finds that it's hard to see the points with the boxplot on top of them.
+To make an adjustment they can rerun the function with format set to `"edit"`.
 
 \begin{fadecode}
 \color[gray]raincloud_original(x = a)
@@ -256,7 +187,7 @@ To make an adjustment they can rerun the function with format set to `"edit"`.
 \end{fadecode}
 
 Running `raincloud_original(x = a, format = "edit")` opens an unnamed R script containing the following code.
-To make the points clearer, the user swaps the order of the jitter and boxplot layers. 
+To make the points clearer, the user swaps the order of the jitter and boxplot layers.
 
 \begin{fadecode}
 \color[black]code_output\$code <- expr({print(
@@ -272,8 +203,7 @@ To make the points clearer, the user swaps the order of the jitter and boxplot l
 \end{fadecode}
 
 After making the change, the user runs the edited block once to save the revised code object.
-Then they call `raincloud_adjust()` to evaluate the modified version in the original function
-environment.
+Then they call `raincloud_adjust()` to evaluate the modified version in the original function environment.
 
 \begin{fadecode}
 \color[black]raincloud_adjust()
@@ -298,11 +228,8 @@ If the user wants several different edited versions with their own names, the ne
 
 ## Binding method
 
-The binding method keeps the same basic edit branch, but returns an object to be
-assigned as opposed to just saving to the global environment.
-As a slight improvement a bnd class was created with a print method
-that takes the code of the object and evaluates it in the
-stored environment.
+The binding method keeps the same basic edit branch, but returns an object to be assigned as opposed to just saving to the global environment.
+As a slight improvement a bnd class was created with a print method that takes the code of the object and evaluates it in the stored environment.
 
 ```r
 if (format == "plot") eval(code_output)
@@ -323,15 +250,11 @@ else if (format == "edit") {
 }
 ```
 
-This means the user can save the returned object under a meaningful name, edit its `$code` slot, and
-then print the object to evaluate the modified code in the original function environment.
+This means the user can save the returned object under a meaningful name, edit its `$code` slot, and then print the object to evaluate the modified code in the original function environment.
 
-The user finds that points are a little clearer now that they are on top, but that the color blends
-into the violin plot background.
-They decide they would like to change the shape of the points and make them black so they stand out
-better.
-In case they want to make further adjustments to the code, they use the binding method and assign it
-to `black_points` in the global environment. 
+The user finds that points are a little clearer now that they are on top, but that the color blends into the violin plot background.
+They decide they would like to change the shape of the points and make them black so they stand out better.
+In case they want to make further adjustments to the code, they use the binding method and assign it to `black_points` in the global environment.
 
 \begin{fadecode}
 \color[gray]raincloud_binding(x = a)
@@ -339,8 +262,7 @@ to `black_points` in the global environment.
 \end{fadecode}
 
 The editable script again contains the plot code, but the wrapper returns an object with class `bnd`.
-The user fills in the object name on the left side of `$code`, edits the plot code, and runs the
-block.
+The user fills in the object name on the left side of `$code`, edits the plot code, and runs the block.
 
 \begin{fadecode}
 \color[black]black_points\$code <- expr({print(
@@ -375,11 +297,12 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   theme(legend.position = "none")
 ```
 
-One limitation is that modified code still lives inside the current R session unless the user saves it separately. For a more permanent solution a user could use the following method. 
+One limitation is that modified code still lives inside the current R session unless the user saves it separately.
+For a more permanent solution a user could use the following method.
 
 ## Template method
 
-For the template method, the creator uses an additional function that can generate new templates for every wrapper function in the package. 
+For the template method, the creator uses an additional function that can generate new templates for every wrapper function in the package.
 
 ```r
 make_template <- function(fun = NULL, template_name = "basic") {
@@ -392,8 +315,7 @@ make_template <- function(fun = NULL, template_name = "basic") {
 }
 ```
 
-The wrapper itself then needs only a small branch that runs the normal plot when no template is
-provided, or sources the user's edited template when one is provided.
+The wrapper itself then needs only a small branch that runs the normal plot when no template is provided, or sources the user's edited template when one is provided.
 
 ```r
 raincloud_template <- function(x, template = NULL) {
@@ -405,18 +327,19 @@ raincloud_template <- function(x, template = NULL) {
 }
 ```
 
-The template file contains the plot code that the user is meant to edit. It is more durable since modified code is stored in an editable `.R` file.
+The template file contains the plot code that the user is meant to edit.
+It is more durable since modified code is stored in an editable `.R` file.
 Because the template is sourced locally, it can still use objects from inside the wrapper function.
 
-The user decides that they would like to make one more adjustment, but decide to store it as a template for sharing. They name it clearer points since all their adjustment make it easier to see the points than in the original wrapper function.
+The user decides that they would like to make one more adjustment, but decide to store it as a template for sharing.
+They name it clearer points since all their adjustment make it easier to see the points than in the original wrapper function.
 
 \begin{fadecode}
 \color[black]make_template("raincloud", "clearer_points")
 \end{fadecode}
 
 This copies the package's raincloud plotting template into `clearer_points.R` and opens it for editing.
-The user can then apply the previous two changes and make one additional adjustment: increasing the
-jitter width from `0.12` to `0.35`, giving the diamond points more horizontal room to spread out.
+The user can then apply the previous two changes and make one additional adjustment: increasing the jitter width from `0.12` to `0.35`, giving the diamond points more horizontal room to spread out.
 
 \begin{fadecode}
 \color[gray]print(
@@ -453,16 +376,11 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
 
 # Conclusion
 
-Considering the pros and cons of the methods described, we would have to recommend the template
-method as being the most valuable for users.
-The ability to not just adjust a function, but save those adjustments in an easily reusable and
-shareable way, is valuable in any collaborative setting where wrapper functions are being used.
-One can easily imagine creating plot templates with colors adjusted to match a company or school
-theme and sharing them with colleagues.
-The difficulty of implementation is also not particularly higher than other simpler methods
-described.
-The largest barrier to entry for all methods described remains how self-contained a wrapper function
-is able to be, since code can only be edited if it is accessible to users. 
+Considering the pros and cons of the methods described, we would have to recommend the template method as being the most valuable for users.
+The ability to not just adjust a function, but save those adjustments in an easily reusable and shareable way, is valuable in any collaborative setting where wrapper functions are being used.
+One can easily imagine creating plot templates with colors adjusted to match a company or school theme and sharing them with colleagues.
+The difficulty of implementation is also not particularly higher than other simpler methods described.
+The largest barrier to entry for all methods described remains how self-contained a wrapper function is able to be, since code can only be edited if it is accessible to users.
 
 # References
 
