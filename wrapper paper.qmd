@@ -31,8 +31,7 @@ code, and potentially even save their modified versions of the wrapper function 
 
 Wrapper functions are a broad category of functions that typically aim to take a more complex task
 and create a simple way of recreating it, often by limiting the number of required inputs
-(\textcolor{magenta}{This is pretty broad, should I focus on a more narrow category of wrapper functions.
-I kind of bounce back and forth between ones that generate figures and ones that generate models}).
+(\textcolor{magenta}{This is pretty broad, I should switch this section to focus more specifically on ggplot wrapper function extensions.})
 To accomplish this, a more complex block of code is wrapped up in a function and many inputs have
 values selected by the creator.
 A few key inputs are left outward-facing to be adjusted by the user with the wrapper function.
@@ -71,7 +70,6 @@ Another important class of wrapper functions is involved in modeling.
 The **fable** package in time series has modeling functions that can take in as little as just a
 dataset and from there the function will make numerous decisions for the user to return what it
 determines to be the best model for their data [@oharawild2024fable].
-(\textcolor{magenta}{Do I provide more modeling examples, do i provide more details.})
 
 ## Advantages
 
