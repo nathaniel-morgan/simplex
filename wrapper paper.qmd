@@ -106,7 +106,7 @@ While this method is easy to implement and nice for single adjustments, it is in
 
 ## Binding method
 
-While the method outlined in section a is nice for minor one-off changes, it would be rather inconvenient if an adjustment was desired to be used regularly.
+While the previous method is nice for minor one-off changes, it would be rather inconvenient if an adjustment was desired to be used regularly.
 This is especially true if you want to use the wrapper function many times, all with the same adjustment.
 To build on the previous method, you could instead bind the adjusted code to a new object in the working environment.
 The wrapper function could be adjusted to take in modified code and run it instead of its original.
@@ -153,9 +153,9 @@ raincloud_original(x = a)
 
 The following methods rely on a copy of the function code stored in the package’s extdata folder, where it can easily be read for editing.
 
-## Original method
+## One-off editing method
 
-For the original method, the package creator first adds an argument such as `format` to the wrapper.
+For the one-off editing method, the package creator first adds an argument such as `format` to the wrapper.
 This argument writes a copy of the template code into a new R script.
 
 ```r
@@ -184,7 +184,6 @@ else if (format == "edit") {
 This creates the editable script for the user and stores both the plot code and the wrapper's environment in `code_output`.
 The stored environment is important because it lets the edited code use objects created inside the wrapper function, such as processed versions of the input data.
 
-The original method is intended for a one-off change.
 The user first runs the plot in its default form, but finds that it's hard to see the points with the boxplot on top of them.
 To make an adjustment, they can rerun the function with format set to `"edit"`.
 
