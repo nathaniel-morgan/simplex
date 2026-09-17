@@ -13,26 +13,21 @@ header-includes:
 
 # Abstract
 
-Wrapper functions are a common class of functions that convert many lines of code into a function with a few inputs for key modifications.
+Wrapper functions are a common class of functions that provide an interface to one or more underlying functions or computational procedures with certain inputs preselected by the wrapper creator.
 Wrappers can greatly simplify the use of complex code, making it far more accessible to less experienced users.
 However, many possible modifications to the original code may become inaccessible, making edits not foreseen by the wrapper creator difficult to impossible for users.
 There are a few ways for wrapper creators to make future edits to their function easier.
-These approaches begin with making the function self-contained, but they can also provide a mechanism for users to view, edit, and save modified versions of the wrapper.
-(\textcolor{magenta}{Do I put a definition for self-contained here?
-Or is it sufficient that it is defined when brought up in the body of the paper?})
+These approaches begin with making the function code more accessible for adjustment, but they can also provide a mechanism for users to view, edit, and save modified versions of the wrapper.
 
 # What are Wrapper functions
 
 ## Basic description
 
 Wrapper functions are a broad category of functions that typically aim to take a more complex task and create a simple way of recreating it, often by limiting the number of required inputs.
-(\textcolor{magenta}{This is pretty broad, I should switch this section to focus more specifically on ggplot wrapper function extensions.})
 To accomplish this, a more complex block of code is wrapped up in a function and many inputs have values selected by the creator.
 A few key inputs are left outward-facing to be adjusted by the user with the wrapper function.
 However, many inputs may be permanently unadjustable by the user.
-Common uses for wrapper functions include complex graphics where there may be hundreds of lines of code, but only a couple are typically of interest to the user.
-Another common use is in modeling functions, where a single function call may test numerous models, check assumptions, clean the data, and return what it considers the best-fitting model.
-(\textcolor{magenta}{Are there other major uses I'm blanking on})
+Common uses for wrapper functions include modeling functions, where a single function call may test numerous models, check assumptions, clean the data, and return what it considers the best-fitting model. Another common use is in complex graphics where there may be hundreds of lines of code, but only a couple are typically of interest to the user. Of particular interest is the large class of extensions that utilize wrappers for creating specific styles of ggplots. 
 
 ## Popular examples
 
@@ -67,13 +62,13 @@ Core code may have even been converted into C or other faster-running languages,
 Issues can begin to crop up if an input that was fixed by the creator is something you need to adjust.
 It could be as simple as switching the line colors of a plot to be more colorblind-friendly.
 Depending on how the wrapper function was written, making minor adjustments can range from a slight inconvenience to a total nightmare as you try to navigate the depths of their package architecture searching for where the color of those lines was actually encoded.
-The simplest wrapper function is just a block of code that has been placed in a function.
-We call these styles of wrapper functions "self-contained" since the function itself contains everything it needs to function.
+We call wrapper functions "self-contained" if the code controlling the intended customization is accessible and if inputs and output structure are well documented.
 Self-contained wrappers are easy to adjust because users can create a new wrapper with slightly modified code or add an input for a value that was previously fixed.
 Difficulties arise when the function is not self-contained.
 The wrapper may call many other functions, each of which could conceivably contain the code you need to adjust, requiring you to search through all of them.
 Outside of just calling other functions, the function could use S3, S4, or R6, giving it custom methods that could further adjust how the output looks.
-If the function calls compiled C code that contains what you want to adjust, there may be nothing you can do outside of writing it all yourself or finding a new package.
+If how these more complex methods function is not clearly documented it can further obscure how the output is generated making it difficult to make adjustments.
+Also, if what you want to adjust is controlled by compiled C code, there may be nothing you can do outside of compiling new C code or finding a new package.
 
 Beyond difficulty with modifying the function, wrapper functions can be very difficult to bug fix.
 The resulting error when something goes wrong can be very unclear, particularly if the error is in another function called by the wrapper function.
@@ -88,12 +83,24 @@ My proposals in this paper don't really do anything to fix that issue.})
 
 Package creators typically create wrapper functions to make their code as usable for users as possible.
 So, what steps exist to allow wrapper functions to be as simple and functional, but open to adjustment as possible?
-One unfortunate drawback to all the following methods is that they work better the more self-contained the function is.
 
-## Original method
+## Pre-existing methods
 
+There are several pre-existing ways to adjust wrapper functions that create ggplots.
+One of them is the `gginnards` package which gives the user tools to move, apend, and delete layers from ggplots to allow the user to make adjustments to already generated ggplots.
+This can be valuable if a user needs to make certain adjustments like changing which layer is on top, or adding/removing a certain geom to the plot. 
+
+A tool used by many creators to make their wrapper functions more customizeable is allowing a `...` argument.
+This can allow for many potential customizations to be passed into the wrapper function. Issues can arise however if the wrapper has several internal functions that share argument names so that `...` impacts several at the same time.
+Another older solution is the base function `edit()` which when given a function opens the code for the function in a pop-out window that allows for editing and then assigning the edited code.
+There are a few difficulties in using `edit()`, for instance if you try and save edited code but there is a mismatch in the number of parenthesis it will quit and delete all changes without saving anything.
+Also, if the adjusted code is saved to a function in the global environment, but it called packages that were internal to a package, it may no longer function. 
+
+## One-off editing method
+
+Our first proposed method is inspired by edit.
 One way to make a function adjustable is to add an argument that runs the wrapper normally by default but, when changed, prints its code into a new document.
-Adjustments to the code could be made live before running it.
+Adjustments to the code could be made live before running it in the original function environment, ensuring that any internal package functions still work.
 This would be helpful for very minor changes like switching the color of a line in a plot, or changing a couple of fixed numeric values.
 While this method is easy to implement and nice for single adjustments, it is inconvenient if a user would like to consistently make the same change when using the function a number of times.
 
@@ -156,7 +163,7 @@ if (format == "plot") eval(code_output)
 else if (format == "edit") {
   output <- glue(
     "# Explanation of how to edit the code here \n\n",
-    "code_output$code <- ", "expr({{",
+    "code_output$code <- ", "rlang::expr({{",
     system.file("extdata", "raincloud.R", package = "package name") |>
       readLines() |>
       paste(collapse = "\n"),
@@ -190,7 +197,7 @@ Running `raincloud_original(x = a, format = "edit")` opens an unnamed R script c
 To make the points clearer, the user swaps the order of the jitter and boxplot layers.
 
 \begin{fadecode}
-\color[black]code_output\$code <- expr({print(
+\color[black]code_output\$code <- rlang::expr({print(
 \color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
 \color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
 \color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
@@ -199,7 +206,7 @@ To make the points clearer, the user swaps the order of the jitter and boxplot l
 \color[gray]    labs(x = NULL, y = NULL)+
 \color[gray]    theme_minimal()+
 \color[gray]    theme(legend.position = "none")
-\color[gray]})
+\color[gray])})
 \end{fadecode}
 
 After making the change, the user runs the edited block once to save the revised code object.
@@ -236,7 +243,7 @@ if (format == "plot") eval(code_output)
 else if (format == "edit") {
   output <- glue(
     "# Fill in the object name to the left of $code \n\n",
-    "$code <- ", "expr({{",
+    "$code <- ", "rlang::expr({{",
     system.file("extdata", "raincloud.R", package = "package name") |>
       readLines() |>
       paste(collapse = "\n"),
@@ -265,7 +272,7 @@ The editable script again contains the plot code, but the wrapper returns an obj
 The user fills in the object name on the left side of `$code`, edits the plot code, and runs the block.
 
 \begin{fadecode}
-\color[black]black_points\$code <- expr({print(
+\color[black]black_points\$code <- rlang::expr({print(
 \color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
 \color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
 \color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
@@ -274,7 +281,7 @@ The user fills in the object name on the left side of `$code`, edits the plot co
 \color[gray]    labs(x = NULL, y = NULL)+
 \color[gray]    theme_minimal()+
 \color[gray]    theme(legend.position = "none")
-\color[gray]})
+\color[gray])})
 \end{fadecode}
 
 Because `black_points` has a print method, the user can display the modified plot by evaluating the object itself.
