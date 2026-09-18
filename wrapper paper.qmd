@@ -1,6 +1,7 @@
 ---
 title: "Wrapper Functions Basic Writeup"
 bibliography: references.bib
+number-sections: true
 format:
   pdf:
     pdf-engine: pdflatex
@@ -9,9 +10,17 @@ editor_options:
 header-includes:
   - \usepackage{fancyvrb}
   - \DefineVerbatimEnvironment{fadecode}{Verbatim}{fontsize=\small, frame=single, commandchars=\\\[\]}
+  - \usepackage{titling}
+  - \setlength{\droptitle}{-3em}
+  - \pretitle{\begin{center}\LARGE\bfseries}
+  - \posttitle{\par\end{center}\vspace{-1em}}
+  - \preauthor{}
+  - \postauthor{}
+  - \predate{}
+  - \postdate{}
 ---
 
-# Abstract
+# Abstract {.unnumbered}
 
 Wrapper functions are a common class of functions that provide an interface to one or more underlying functions or computational procedures with certain inputs preselected by the wrapper creator.
 Wrappers can greatly simplify the use of complex code, making it far more accessible to less experienced users.
