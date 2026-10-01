@@ -1,5 +1,5 @@
 ---
-title: "Wrapper Functions Basic Writeup"
+title: "Approaches to Increasing the User Customizability of Wrapper Functions"
 bibliography: references.bib
 number-sections: true
 format:
@@ -10,6 +10,8 @@ editor_options:
 header-includes:
   - \usepackage{fancyvrb}
   - \DefineVerbatimEnvironment{fadecode}{Verbatim}{fontsize=\small, frame=single, commandchars=\\\[\]}
+  - \newcommand{\fadeblack}{\color{black}}
+  - \newcommand{\fadegray}{\color{gray}}
   - \usepackage{titling}
   - \setlength{\droptitle}{-3em}
   - \pretitle{\begin{center}\LARGE\bfseries}
@@ -97,7 +99,7 @@ So, what steps exist to allow wrapper functions to be as simple and functional, 
 ## Pre-existing methods
 
 There are several pre-existing ways to adjust wrapper functions that create ggplots.
-One of them is the `gginnards` package, which gives the user tools to move, append, and delete layers from ggplots to allow the user to make adjustments to already generated ggplots.
+One of them is the **gginnards** package, which gives the user tools to move, append, and delete layers from ggplots to allow the user to make adjustments to already generated ggplots.
 This can be valuable if a user needs to make certain adjustments like changing which layer is on top or adding/removing a certain geom to the plot.
 
 A tool used by many creators to make their wrapper functions more customizable is allowing a variadic argument denoted `...` in `R`.
@@ -198,31 +200,31 @@ The user first runs the plot in its default form, but finds that it's hard to se
 To make an adjustment, they can rerun the function with format set to `"edit"`.
 
 \begin{fadecode}
-\color[gray]raincloud_original(x = a)
-\color[black]raincloud_original(x = a, format = "edit")
+\fadegray raincloud_original(x = a)
+\fadeblack raincloud_original(x = a, format = "edit")
 \end{fadecode}
 
 Running `raincloud_original(x = a, format = "edit")` opens an unnamed R script containing the following code.
 To make the points clearer, the user swaps the order of the jitter and boxplot layers.
 
 \begin{fadecode}
-\color[black]code_output\$code <- rlang::expr({print(
-\color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
-\color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-\color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
-\color[black]    geom_jitter(width = 0.12, alpha = 0.35, size = 1.2)+
-\color[gray]    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
-\color[gray]    labs(x = NULL, y = NULL)+
-\color[gray]    theme_minimal()+
-\color[gray]    theme(legend.position = "none")
-\color[gray])})
+\fadeblack code_output\$code <- rlang::expr({print(
+\fadegray  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
+\fadegray    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+\fadeblack    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+\fadeblack    geom_jitter(width = 0.12, alpha = 0.35, size = 1.2)+
+\fadegray    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+\fadegray    labs(x = NULL, y = NULL)+
+\fadegray    theme_minimal()+
+\fadegray    theme(legend.position = "none")
+\fadegray)})
 \end{fadecode}
 
 After making the change, the user runs the edited block once to save the revised code object.
 Then they call `raincloud_adjust()` to evaluate the modified version in the original function environment.
 
 \begin{fadecode}
-\color[black]raincloud_adjust()
+\fadeblack raincloud_adjust()
 \end{fadecode}
 
 ```{r}
@@ -273,30 +275,30 @@ They decide they would like to change the shape of the points and make them blac
 In case they want to make further adjustments to the code, they use the binding method and assign it to `black_points` in the global environment.
 
 \begin{fadecode}
-\color[gray]raincloud_binding(x = a)
-\color[black]black_points <- raincloud_binding(x = a, format = "edit")
+\fadegray raincloud_binding(x = a)
+\fadeblack black_points <- raincloud_binding(x = a, format = "edit")
 \end{fadecode}
 
 The editable script again contains the plot code, but the wrapper returns an object with class `bnd`.
 The user fills in the object name on the left side of `$code`, edits the plot code, and runs the block.
 
 \begin{fadecode}
-\color[black]black_points\$code <- rlang::expr({print(
-\color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
-\color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-\color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
-\color[black]    geom_jitter(width = 0.12, alpha = 0.35, shape = 5, color = "black")+
-\color[gray]    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
-\color[gray]    labs(x = NULL, y = NULL)+
-\color[gray]    theme_minimal()+
-\color[gray]    theme(legend.position = "none")
-\color[gray])})
+\fadeblack black_points\$code <- rlang::expr({print(
+\fadegray  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
+\fadegray    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+\fadeblack    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+\fadeblack    geom_jitter(width = 0.12, alpha = 0.35, shape = 5, color = "black")+
+\fadegray    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+\fadegray    labs(x = NULL, y = NULL)+
+\fadegray    theme_minimal()+
+\fadegray    theme(legend.position = "none")
+\fadegray)})
 \end{fadecode}
 
 Because `black_points` has a print method, the user can display the modified plot by evaluating the object itself.
 
 \begin{fadecode}
-\color[black]black_points
+\fadeblack black_points
 \end{fadecode}
 
 ```{r}
@@ -351,29 +353,29 @@ The user decides that they would like to make one more adjustment but decides to
 They name it `clearer_points` since all their adjustments make it easier to see the points than in the original wrapper function.
 
 \begin{fadecode}
-\color[black]make_template("raincloud", "clearer_points")
+\fadeblack make_template("raincloud", "clearer_points")
 \end{fadecode}
 
 This copies the package's raincloud plotting template into `clearer_points.R` and opens it for editing.
 The user can then apply the previous two changes and make one additional adjustment: increasing the jitter width from `0.12` to `0.35`, giving the diamond points more horizontal room to spread out.
 
 \begin{fadecode}
-\color[gray]print(
-\color[gray]  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
-\color[gray]    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-\color[black]    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
-\color[black]    geom_jitter(width = 0.35, alpha = 0.35, shape = 5, color = "black")+
-\color[gray]    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
-\color[gray]    labs(x = NULL, y = NULL)+
-\color[gray]    theme_minimal()+
-\color[gray]    theme(legend.position = "none")
-\color[gray])
+\fadegray print(
+\fadegray  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
+\fadegray    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
+\fadeblack    geom_boxplot(width = 0.16, outlier.shape = NA, fill = "white", color = "black")+
+\fadeblack    geom_jitter(width = 0.35, alpha = 0.35, shape = 5, color = "black")+
+\fadegray    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
+\fadegray    labs(x = NULL, y = NULL)+
+\fadegray    theme_minimal()+
+\fadegray    theme(legend.position = "none")
+\fadegray)
 \end{fadecode}
 
 Once the file is saved, the wrapper can use the modified template directly.
 
 \begin{fadecode}
-\color[black]raincloud_template(a, "clearer_points.R")
+\fadeblack raincloud_template(a, "clearer_points.R")
 \end{fadecode}
 
 ```{r}
