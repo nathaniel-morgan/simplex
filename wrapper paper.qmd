@@ -227,7 +227,7 @@ To make the points clearer, the user swaps the order of the jitter and boxplot l
 code_output$code <- rlang::expr({print(
  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-   geom_boxplot(width = 0.16, outliers = F, fill = "white", color = "black")+
+   geom_boxplot(width = 0.16, outliers = F, fill = "white", col = 1)+
    geom_jitter(width = 0.12, alpha = 0.35, size = 1.2)+
    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
    labs(x = NULL, y = NULL)+
@@ -249,7 +249,7 @@ raincloud_adjust()
 #| echo: false
 ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-  geom_boxplot(width = 0.16, outliers = F, fill = "white", color = "black")+
+  geom_boxplot(width = 0.16, outliers = F, fill = "white", col = 1)+
   geom_jitter(width = 0.12, alpha = 0.35, size = 1.2)+
   stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
   labs(x = NULL, y = NULL)+
@@ -302,7 +302,7 @@ The user fills in the object name on the left side of `$code`, edits the plot co
 black_points$code <- rlang::expr({print(
  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-   geom_boxplot(width = 0.16, outliers = F, fill = "white", color = "black")+
+   geom_boxplot(width = 0.16, outliers = F, fill = "white", col = 1)+
    geom_jitter(width = 0.12, alpha = 0.35, shape = 5, color = "black")+
    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
    labs(x = NULL, y = NULL)+
@@ -323,7 +323,7 @@ black_points
 #| echo: false
 ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-  geom_boxplot(width = 0.16, outliers = F, fill = "white", color = "black")+
+  geom_boxplot(width = 0.16, outliers = F, fill = "white", col = 1)+
   geom_jitter(width = 0.12, alpha = 0.35, shape = 5, color = "black")+
   stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
   labs(x = NULL, y = NULL)+
@@ -379,7 +379,7 @@ The user can then apply the previous two changes and make one additional adjustm
 print(
  ggplot(x, aes(x = class, y = value, fill = class, color = class))+
    geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-   geom_boxplot(width = 0.16, outliers = F, fill = "white", color = "black")+
+   geom_boxplot(width = 0.16, outliers = F, fill = "white", col = 1)+
    geom_jitter(width = 0.35, alpha = 0.35, shape = 5, color = "black")+
    stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
    labs(x = NULL, y = NULL)+
@@ -400,7 +400,7 @@ raincloud_template(a, "clearer_points.R")
 #| echo: false
 ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
-  geom_boxplot(width = 0.16, outliers = F, fill = "white", color = "black")+
+  geom_boxplot(width = 0.16, outliers = F, fill = "white", col = 1)+
   geom_jitter(width = 0.35, alpha = 0.35, shape = 5, color = "black")+
   stat_summary(fun = median, geom = "point", size = 2.2, color = "black")+
   labs(x = NULL, y = NULL)+
