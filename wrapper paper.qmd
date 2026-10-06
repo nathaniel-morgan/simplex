@@ -2,16 +2,56 @@
 title: "Approaches to Increasing the User Customizability of Wrapper Functions"
 bibliography: references.bib
 number-sections: true
+lang: en-US
 format:
   pdf:
-    pdf-engine: pdflatex
+    pdf-engine: lualatex
+    pdf-standard: ua-2
+    documentclass: article
+    fontsize: 11pt
+    # Preserve the previous text area while using a class that supports tagging.
+    geometry:
+      - textwidth=446.76pt
+      - textheight=582.2pt
+      - top=1in
+      - hcentering
+knitr:
+  opts_chunk:
+    dev: cairo_pdf
 editor_options:
   chunk_output_type: console
 filters:
   - code-highlights.lua
 header-includes:
-  - \usepackage{fvextra}
-  - \AtBeginDocument{\RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},breaklines=true,breakanywhere=true}}
+  - \usepackage{fancyvrb}
+  - \usepackage{etoolbox}
+  - |
+    \makeatletter
+    % Restore the previous title appearance while retaining its accessibility tag.
+    \renewcommand{\@maketitle}{%
+      \newpage\null\vskip 2em\vspace*{-2em}%
+      {\begin{center}[tagging-suppress-paras=true,tagging-recipe=standalone,tag-name=\UseStructureName{title/block}]%
+        \LARGE\bfseries\UseTaggingSocket{title}{}{\@title}\par
+      \end{center}}%
+      \par\vskip 1.5em
+    }
+    \makeatother
+    \EditInstance{heading}{section}{heading-decls=\normalfont\Large\sffamily\bfseries}
+    \EditInstance{heading}{subsection}{heading-decls=\normalfont\large\sffamily\bfseries}
+  - \renewenvironment{Shaded}{}{}
+  - |
+    \newcommand{\codebackgroundline}[1]{%
+      \begingroup
+      \setlength{\fboxsep}{0pt}%
+      \colorbox{shadecolor}{\makebox[\linewidth][l]{\strut#1}}%
+      \endgroup
+    }
+    \newcommand{\CodeFormatLine}[1]{\codebackgroundline{\CodePlainFormatLine{#1}}}
+    \AtBeginDocument{%
+      \RecustomVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}%
+      \let\CodePlainFormatLine\FancyVerbFormatLine
+      \let\FancyVerbFormatLine\CodeFormatLine
+    }
   - |
     \newcommand{\fadecodeline}[1]{%
       \begingroup
@@ -28,14 +68,6 @@ header-includes:
       #1%
       \endgroup
     }
-  - \usepackage{titling}
-  - \setlength{\droptitle}{-3em}
-  - \pretitle{\begin{center}\LARGE\bfseries}
-  - \posttitle{\par\end{center}\vspace{-1em}}
-  - \preauthor{}
-  - \postauthor{}
-  - \predate{}
-  - \postdate{}
 ---
 
 # Abstract {.unnumbered}
@@ -176,6 +208,7 @@ a <- tibble::tibble(
 ```{r}
 #| label: raincloud-default
 #| fig-cap: "Default raincloud wrapper output."
+#| fig-alt: "Raincloud plots show 200 observations in each of groups a and b. Group a is roughly symmetric around 1, while group b is right-skewed with many values near zero. Colored circles are drawn behind narrow white boxplots, obscuring some observations. Pale violins show the distributions, and black circles mark the group medians."
 raincloud_original(x = a)
 ```
 
@@ -246,6 +279,7 @@ raincloud_adjust()
 ```{r}
 #| label: raincloud-original-adjusted
 #| fig-cap: "Original-method edit: the boxplot is drawn behind the jittered points."
+#| fig-alt: "Raincloud plots for groups a and b combine pale violin distributions, narrow white boxplots, colored jittered circles, and black median markers. The circles are drawn above the boxplots, so observations within the boxplot area are visible. Group a is roughly symmetric, while group b is right-skewed."
 #| echo: false
 ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
@@ -320,6 +354,7 @@ black_points
 ```{r}
 #| label: raincloud-binding-adjusted
 #| fig-cap: "Binding-method edit: jittered points are drawn on top as black diamonds."
+#| fig-alt: "Raincloud plots for groups a and b show individual observations as black outlined diamonds above narrow white boxplots and pale violin distributions. The diamond shape and black outlines distinguish the observations from the colored violin backgrounds. Solid black circles mark the group medians; group a is roughly symmetric and group b is right-skewed."
 #| echo: false
 ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
@@ -397,6 +432,7 @@ raincloud_template(a, "clearer_points.R")
 ```{r}
 #| label: raincloud-template-adjusted
 #| fig-cap: "Template-method edit: previous edits plus wider jitter spacing."
+#| fig-alt: "Raincloud plots for groups a and b show black outlined diamond observations above white boxplots and pale violins. Wider horizontal jitter spreads the diamonds across each group, reducing overlap while preserving their vertical values. Solid black circles mark the group medians; group a is roughly symmetric and group b is right-skewed."
 #| echo: false
 ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   geom_violin(alpha = 0.25, trim = FALSE, width = 0.85, color = NA)+
@@ -452,6 +488,7 @@ paired_data <- tibble::as_tibble(paired_data)
 #| fig-height: 4.2
 #| fig-pos: H
 #| fig-cap: "Paired-measurements template applied to simulated data. Each circle is a participant's mean over six trials; grey lines connect the same participant across conditions. Violins and boxplots summarize the 24 participant means in each condition, and black diamonds mark their medians."
+#| fig-alt: "Paired raincloud plots compare Condition A and Condition B for 24 participants. Each circle is a participant's mean over six trials, and a gray line connects that participant's two means. Most lines slope upward toward Condition B, while some slope downward. Violin and boxplot layers summarize each condition's distribution, and black diamonds mark the condition medians."
 set.seed(17)
 raincloud_template(paired_data, "paired_measurements.R")
 ```
@@ -474,11 +511,16 @@ Saving these changes in a template allows the group to reuse and share a consist
 The difficulty of implementation is not particularly higher than other simpler methods described.
 The largest barrier to entry for all methods described remains how self-contained a wrapper function is able to be, since code can only be edited if it is accessible to users.
 
+# Acknowledgements
+
+Dr. James Otto was regularly involved in discussions of how to increase accessibility for future users of a wrapper function. These discussions helped lead to methods suggested in this paper. 
+
 # AI usage statement
 
 ChatGPT 5.5 was used in ideation for a simple visual to explain wrapper functions with.
 It was also used to identify related time-series literature.
 ChatGPT 5.6-sol was used for grammar, spelling, improved word choice, and searching for important examples of wrapper functions. 5.6-sol was also used to help with formatting the code blocks so that key lines were highlighted. 
+ChatGPT 6.1-sol was used to ensure this document was aligned with ADA recommended practices.
 
 # References
 

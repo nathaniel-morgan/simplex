@@ -28,11 +28,12 @@ function CodeBlock(block)
         number .. "\\endcsname{}"
     end
   end
-  setup[#setup + 1] = [[\renewcommand{\FancyVerbFormatText}[1]{%
+  setup[#setup + 1] = [[\let\CodeDefaultFormatLine\FancyVerbFormatLine
+\renewcommand{\FancyVerbFormatLine}[1]{%
 \ifcsname CodeEmphasisLine:\arabic{FancyVerbLine}\endcsname%
-#1%
+\CodeDefaultFormatLine{#1}%
 \else%
-\fadecodeline{#1}%
+\CodeDefaultFormatLine{\fadecodeline{#1}}%
 \fi}]]
   block.attributes["highlight-lines"] = nil
   return {
