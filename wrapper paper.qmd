@@ -78,9 +78,9 @@ However, many possible modifications to the original code may become inaccessibl
 There are a few ways for wrapper creators to make future edits to their function easier.
 These approaches begin with making the function code more accessible for adjustment, but they can also provide a mechanism for users to view, edit, and save modified versions of the wrapper.
 
-# What are Wrapper functions
+# What are Wrapper Functions
 
-## Basic description
+## Basic Description
 
 Wrapper functions are a broad category of functions that typically aim to take a more complex task and create a simple way of recreating it, often by limiting the number of required inputs.
 To accomplish this, a more complex block of code is wrapped up in a function and many inputs have values selected by the creator.
@@ -88,7 +88,7 @@ A few key inputs are left outward-facing to be adjusted by the user with the wra
 However, many inputs may be permanently unadjustable by the user.
 Common uses for wrapper functions include modeling functions, where a single function call may test numerous models, check assumptions, clean the data, and return what it considers the best-fitting model. Another common use is in complex graphics where there may be hundreds of lines of code, but only a couple are typically of interest to the user. Of particular interest is the large class of extensions that utilize wrappers for creating specific styles of ggplots.
 
-## Popular examples
+## Popular Examples
 
 A popular class of wrapper functions helps users create complex ggplots involving multiple layers with as little as one line of code.
 A major example of this style is `autoplot()`, which uses the class of the object given to it to choose an appropriate ggplot display [@wickham2016ggplot2].
@@ -139,12 +139,12 @@ Code being more accessible to the user can make it easier to inspect how a wrapp
 For instance, when certain parameter values are selected, it can be helpful to know if they were preselected values or if some sort of grid search was used to select the best values.
 Also, what metric was used to determine the best values.
 
-# Ways to combat Basic Issues
+# Ways to Combat Basic Issues
 
 Package creators typically create wrapper functions to make their code as usable for users as possible.
 So, what steps exist to allow wrapper functions to be as simple and functional, but open to adjustment as possible?
 
-## Pre-existing methods
+## Pre-existing Methods
 
 There are several pre-existing ways to adjust wrapper functions that create ggplots.
 One of them is the **gginnards** package, which gives the user tools to move, append, and delete layers from ggplots to allow the user to make adjustments to already generated ggplots.
@@ -156,7 +156,7 @@ Another older solution is the base function `edit()`, which, when given a functi
 There are a few difficulties in using `edit()`; for instance, if you try and save edited code but there is a mismatch in the number of parentheses, it will quit and delete all changes without saving anything.
 Also, if the adjusted code is saved to a function in the global environment, but it called packages that were internal to a package, it may no longer function.
 
-## One-off editing method
+## One-off Editing Method
 
 Our first proposed method is inspired by edit.
 One way to make a function adjustable is to add an argument that runs the wrapper normally by default but, when changed, prints its code into a new document.
@@ -164,7 +164,7 @@ Adjustments to the code could be made live before running it in the original fun
 This would be helpful for very minor changes like switching the color of a line in a plot or changing a couple of fixed numeric values.
 While this method is easy to implement and nice for single adjustments, it is inconvenient if a user would like to consistently make the same change when using the function a number of times.
 
-## Binding method
+## Binding Method
 
 While the previous method is nice for minor one-off changes, it would be rather inconvenient if an adjustment was desired to be used regularly.
 This is especially true if you want to use the wrapper function many times, all with the same adjustment.
@@ -175,7 +175,7 @@ The wrapper function could even allow the name of the binding to be passed into 
 This creates a more semi-permanent solution, but the edited code living in the global environment requires the user to re-create it or save it as an RDS between sessions.
 It also requires the creator to add several arguments to every wrapper function they would like to be editable by the user.
 
-## Template method
+## Template Method
 
 The previous methods have both involved editing wrapper functions to have their typical functionality as well as arguments that give them editing functions.
 For a single wrapper, this can be useful, but for a package containing multiple wrappers it may be cleaner to have a single editing function that works for all wrapper functions.
@@ -214,7 +214,7 @@ raincloud_original(x = a)
 
 The following methods rely on a copy of the function code stored in the package’s extdata folder, where it can easily be read for editing.
 
-## One-off editing method
+## One-off Editing Method
 
 For the one-off editing method, the package creator first adds an argument such as `format` to the wrapper.
 This argument writes a copy of the template code into a new R script.
@@ -294,7 +294,7 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
 Since the modified code lives in the default `code_output` object, creating a new version of the wrapper function will overwrite it.
 If the user wants several different edited versions with their own names, the next method is more convenient.
 
-## Binding method
+## Binding Method
 
 The binding method keeps the same basic edit branch but returns an object to be assigned as opposed to just saving to the global environment.
 As a slight improvement, a bnd class was created with a print method that takes the code of the object and evaluates it in the stored environment.
@@ -369,7 +369,7 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
 One limitation is that the modified code still lives inside the current R session unless the user saves it separately.
 For a more permanent solution, a user could use the following method.
 
-## Template method
+## Template Method
 
 For the template method, the creator uses an additional function that can generate new templates for every wrapper function in the package.
 
@@ -444,7 +444,7 @@ ggplot(a, aes(x = class, y = value, fill = class, color = class))+
   theme(legend.position = "none")
 ```
 
-## A template for repeated measurements
+## A Template for Repeated Measurements
 
 A more substantial customization adapts the raincloud wrapper to repeated measurements from the same participants.
 Suppose each participant completes several trials in each of two conditions, and the desired display should show both the distribution of participant averages and each participant's change between conditions.
@@ -515,7 +515,7 @@ The largest barrier to entry for all methods described remains how self-containe
 
 Dr. James Otto was regularly involved in discussions of how to increase accessibility for future users of a wrapper function. These discussions helped lead to methods suggested in this paper. 
 
-# AI usage statement
+# AI Usage Statement
 
 ChatGPT 5.5 was used in ideation for a simple visual to explain wrapper functions with.
 It was also used to identify related time-series literature.
