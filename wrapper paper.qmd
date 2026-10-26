@@ -78,7 +78,7 @@ However, many possible modifications to the original code may become inaccessibl
 There are a few ways for wrapper creators to make future edits to their function easier.
 These approaches begin with making the function code more accessible for adjustment, but they can also provide a mechanism for users to view, edit, and save modified versions of the wrapper.
 
-# What are Wrapper Functions
+# Wrapper Functions
 
 ## Basic Description
 
@@ -184,7 +184,7 @@ The user provides a name for the template, and when the edits are complete, the 
 These templates allow for long-term use of modified code for the user and even for templates to be shared between users if several would like to make the same adjustment.
 The only adjustment that needs to be made to the wrapper functions themselves in this method is allowing for a template to be provided and running the template code instead.
 
-# How to Implement
+# Implementation Considerations
 
 To give a running example of how this might work, we've created a wrapper function called raincloud that takes in a tibble with two variables, value and class.
 The default wrapper produces a violin plot with jittered observations, a narrow boxplot, and a median point.
@@ -519,8 +519,8 @@ Dr. James Otto was regularly involved in discussions of how to increase accessib
 
 ChatGPT 5.5 was used in ideation for a simple visual to explain wrapper functions with.
 It was also used to identify related time-series literature.
-ChatGPT 5.6-sol was used for grammar, spelling, improved word choice, and searching for important examples of wrapper functions. 5.6-sol was also used to help with formatting the code blocks so that key lines were highlighted. 
-ChatGPT 6.1-sol was used to ensure this document was aligned with ADA recommended practices.
+ChatGPT 5.6-Sol was used for grammar, spelling, improved word choice, and searching for important examples of wrapper functions. 5.6-sol was also used to help with formatting the code blocks so that key lines were highlighted. 
+ChatGPT 6.1-Sol was used to ensure this document was aligned with ADA recommended practices.
 
 # References
 
